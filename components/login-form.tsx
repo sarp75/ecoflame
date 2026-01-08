@@ -45,8 +45,9 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
+      window.location.href = "/";
       // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/");
+      //router.push("/");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Bir hata oluştu.");
 

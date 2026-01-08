@@ -24,9 +24,10 @@ export default function InstallPage() {
       setDeferredPrompt(event);
       setMessage("hazırsın, aşağıdaki butonla ana ekrana ekle");
     };
-
+    // @ts-expect-error nigga
     window.addEventListener("beforeinstallprompt", handlePrompt);
     return () =>
+      // @ts-expect-error nigga
       window.removeEventListener("beforeinstallprompt", handlePrompt);
   }, []);
 
