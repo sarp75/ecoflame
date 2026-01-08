@@ -13,6 +13,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+     * - install cuz it's a one-time setup route
      * - /images cuz it's a folder with static images and shit
      * - /api cuz i don't wanna have a shitload of latency on api routes
      * Feel free to modify this pattern to include more paths.
