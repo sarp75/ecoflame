@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className={`antialiased dark`}>
+      <body className={`antialiased dark h-screen max-h-screen overflow-hidden`}>
         <Toaster className="select-none" />
         {children}
       </body>

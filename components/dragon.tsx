@@ -5,23 +5,23 @@ import type { UserProfile } from "@/app/page";
 import { xpToLevel } from "@/lib/progression";
 
 const HABITATS = [
-  { bg: "from-[#041106] via-[#0f2b16] to-[#1f4f2c]", title: "tohum diyarı" },
-  { bg: "from-[#06160a] via-[#12381f] to-[#225f37]", title: "yeşim ini" },
-  { bg: "from-[#091d0d] via-[#164529] to-[#2d7a4f]", title: "ışık ormanı" },
-  { bg: "from-[#0b1f0c] via-[#1e5c34] to-[#3a8c54]", title: "spiral vadisi" },
-  { bg: "from-[#0e2410] via-[#23623a] to-[#47a366]", title: "yaşam kubbesi" },
-  { bg: "from-[#112a12] via-[#2f7346] to-[#5dbc7f]", title: "zümrüt tacı" },
-  { bg: "from-[#142f16] via-[#388256] to-[#7fd49f]", title: "aurora çayırı" },
-  { bg: "from-[#17381b] via-[#3f9b64] to-[#9af7ba]", title: "solar bahçe" },
-  { bg: "from-[#1b3f21] via-[#44b978] to-[#b4ffd0]", title: "sonsuz koru" },
+  { bg: "from-[#041106] via-[#0f2b16] to-[#1f4f2c]", title: "Tohum Diyarı" },
+  { bg: "from-[#06160a] via-[#12381f] to-[#225f37]", title: "Yeşim İni" },
+  { bg: "from-[#091d0d] via-[#164529] to-[#2d7a4f]", title: "Işık Ormanı" },
+  { bg: "from-[#0b1f0c] via-[#1e5c34] to-[#3a8c54]", title: "Spiral Vadisi" },
+  { bg: "from-[#0e2410] via-[#23623a] to-[#47a366]", title: "Yaşam Kubbesi" },
+  { bg: "from-[#112a12] via-[#2f7346] to-[#5dbc7f]", title: "Zümrüt Tacı" },
+  { bg: "from-[#142f16] via-[#388256] to-[#7fd49f]", title: "Aurora Çayırı" },
+  { bg: "from-[#17381b] via-[#3f9b64] to-[#9af7ba]", title: "Solar Bahçe" },
+  { bg: "from-[#1b3f21] via-[#44b978] to-[#b4ffd0]", title: "Sonsuz Koru" },
 ];
 const TIPS = [
-  "{name}, su iyi giderdi! {coins} coin ile depo doldurursun.",
   "şşş {name}, seviye {level} sonrası yeni habitat açılıyor",
+  "klanın güçlü mü {name}? ejderhanla göster!",
   "bugün {name} tam {level} level, kimse bulaşmasın.",
   "coin sayısı {coins}, biraz görevle arttıralım mı?",
+  "{name}, su iyi giderdi! {coins} coin ile depo doldurursun.",
   "{name}, ejderha bakımı sabır ister, acele etme.",
-  "klanın güçlü mü {name}? ejderhanla göster!",
 ];
 
 export default function DragonComponent(me: UserProfile) {
