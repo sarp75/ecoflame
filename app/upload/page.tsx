@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
 type Task = {
@@ -36,9 +35,9 @@ export default function UploadPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskId, setTaskId] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<
+    "idle" | "uploading" | "success" | "error"
+  >("idle");
   const [message, setMessage] = useState("");
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
 
@@ -101,13 +100,20 @@ export default function UploadPage() {
   };
 
   return (
-    <main className="min-h-screen w-full space-y-6 bg-gradient-to-b from-[#041306] via-[#0c2412] to-[#163b25] px-4 py-6 text-emerald-50 sm:px-10 sm:py-10">
+    <main className="min-h-screen w-full flex flex-col space-y-6 bg-gradient-to-b from-[#041306] via-[#0c2412] to-[#163b25] px-4 py-6 text-emerald-50 sm:px-10 sm:py-10">
       <div className="flex items-center justify-between rounded-2xl border border-emerald-700/30 bg-emerald-900/20 px-4 py-3 shadow-lg shadow-black/50">
-        <Button variant="ghost" asChild className="text-emerald-100 hover:bg-emerald-500/10">
+        <Button
+          variant="ghost"
+          asChild
+          className="text-emerald-100 hover:bg-emerald-500/10"
+        >
           <Link href="/">← Ana sayfa</Link>
         </Button>
         {selectedTask && (
-          <Badge variant="secondary" className="border border-lime-300/40 bg-lime-400/10 text-lime-50">
+          <Badge
+            variant="secondary"
+            className="border border-lime-300/40 bg-lime-400/10 text-lime-50"
+          >
             +{selectedTask.xp} XP
           </Badge>
         )}
@@ -120,37 +126,30 @@ export default function UploadPage() {
       </section>
       {selectedTask ? (
         <div className="rounded-3xl border border-emerald-600/40 bg-[#0c2414]/60 p-5 text-sm shadow-inner shadow-black/40">
-          <p className="text-xs uppercase tracking-[0.4em] text-emerald-300/80">aktif görev</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-emerald-300/80">
+            aktif görev
+          </p>
           <div className="mt-2 flex flex-col gap-1">
             <span className="text-lg font-semibold">{selectedTask.name}</span>
-            <span className="text-xs text-emerald-200/80">{selectedTask.desc || "Kanıt fotoğrafı yükleyerek tamamla."}</span>
+            <span className="text-xs text-emerald-200/80">
+              {selectedTask.desc || "Kanıt fotoğrafı yükleyerek tamamla."}
+            </span>
           </div>
           <div className="mt-4 flex items-center justify-between text-[10px] uppercase tracking-[0.35em] text-emerald-200/80">
-            <Badge className="border border-lime-300/40 bg-lime-400/10 text-lime-50">+{selectedTask.xp} xp</Badge>
-            <span className="rounded-full border border-emerald-500/40 px-3 py-1">proof · {selectedTask.proof_type}</span>
+            <Badge className="border border-lime-300/40 bg-lime-400/10 text-lime-50">
+              +{selectedTask.xp} xp
+            </Badge>
           </div>
         </div>
       ) : (
         <div className="rounded-3xl border border-dashed border-emerald-600/40 bg-[#08180d]/80 p-5 text-sm text-emerald-200/70">
-          Henüz görev seçilmedi. Aşağıdan bir görev seçerek slotu doldur.
+          Bir hata oluştu, lütfen bir görev seçin.
         </div>
       )}
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-3xl border border-emerald-600/40 bg-[#07140b]/70 p-6 shadow-[0_0_45px_rgba(0,0,0,0.7)] backdrop-blur">
-        <div className="grid gap-2">
-          <label className="text-sm font-medium text-emerald-100">Görev seç (opsiyonel)</label>
-          <select
-            value={taskId}
-            onChange={(event) => setTaskId(event.target.value)}
-            className="rounded-xl border border-emerald-700/40 bg-[#0f2515] px-3 py-2 text-sm text-emerald-50 focus:outline-none focus:ring-2 focus:ring-lime-400/80"
-          >
-            <option value="">Görev seç</option>
-            {tasks.map((task) => (
-              <option key={task.id} value={task.id}>
-                {task.name} (+{task.xp} XP)
-              </option>
-            ))}
-          </select>
-        </div>
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 rounded-3xl border border-emerald-600/40 bg-[#07140b]/70 p-6 shadow-[0_0_45px_rgba(0,0,0,0.7)] backdrop-blur"
+      >
         <div className="grid gap-2">
           <label className="text-sm font-medium text-emerald-100">Dosya</label>
           <input
@@ -162,21 +161,26 @@ export default function UploadPage() {
             required
           />
         </div>
-        <Button type="submit" className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400 py-4 text-lg font-semibold text-zinc-900 shadow-lg shadow-emerald-900/60 transition-transform hover:scale-[1.02]" disabled={status === "uploading"}>
+        <Button
+          type="submit"
+          className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400 py-4 text-lg font-semibold text-zinc-900 shadow-lg shadow-emerald-900/60 transition-transform hover:scale-[1.02]"
+          disabled={status === "uploading"}
+        >
           {status === "uploading" ? "Yükleniyor..." : "Gönder"}
         </Button>
-        {message && (
-          <p className={cnStatusClass(status)}>
-            {message}
-          </p>
-        )}
+        {message && <p className={cnStatusClass(status)}>{message}</p>}
       </form>
       {uploadResult && (
         <div className="space-y-3 rounded-3xl border border-emerald-600/40 bg-[#0b1e12]/85 p-5 shadow-lg shadow-black/60">
           <h2 className="text-lg font-semibold dark:text-white">Son yükleme</h2>
           <p className="text-sm text-emerald-200/90">
             URL:{" "}
-            <a href={uploadResult.proof_url} target="_blank" rel="noreferrer" className="text-lime-300 underline decoration-dotted">
+            <a
+              href={uploadResult.proof_url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-lime-300 underline decoration-dotted"
+            >
               {uploadResult.proof_url}
             </a>
           </p>
@@ -184,13 +188,17 @@ export default function UploadPage() {
             Tarih: {new Date(uploadResult.created_at).toLocaleString()}
           </p>
           {uploadResult.status && (
-            <Badge variant="outline" className="border border-emerald-400/50 bg-emerald-400/10 text-emerald-50">
+            <Badge
+              variant="outline"
+              className="border border-emerald-400/50 bg-emerald-400/10 text-emerald-50"
+            >
               {humanizeLabel(uploadResult.status) || uploadResult.status}
             </Badge>
           )}
           {uploadResult.reward && (
             <p className="text-sm text-muted-foreground">
-              Ödül: +{uploadResult.reward.xp} XP, +{uploadResult.reward.coins} Coin
+              Ödül: +{uploadResult.reward.xp} XP, +{uploadResult.reward.coins}{" "}
+              Coin
             </p>
           )}
           {uploadResult.validation && (
@@ -217,54 +225,11 @@ export default function UploadPage() {
           )}
         </div>
       )}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold dark:text-white">Görev listesi</h2>
-          <Badge variant="outline">{tasks.length} görev</Badge>
-        </div>
-        <ScrollArea className="h-64 rounded-3xl border border-emerald-700/40 bg-[#07160b]/60">
-          <div className="space-y-3 p-3">
-            {tasks.length ? (
-              tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`rounded-2xl border p-3 ${
-                    taskId === task.id
-                      ? "border-lime-400/60 bg-lime-400/10 shadow-[0_0_25px_rgba(124,255,170,0.3)]"
-                      : "border-emerald-800/40 bg-[#0b1f12]/80"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium dark:text-white">
-                      {task.name}
-                    </span>
-                    <Badge variant="secondary">+{task.xp} XP</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {task.desc || "Kanıt fotoğrafı yükleyerek tamamla."}
-                  </p>
-                  <Button
-                    size="sm"
-                    variant={taskId === task.id ? "default" : "outline"}
-                    className="mt-3 rounded-xl border border-lime-400/40 bg-gradient-to-r from-emerald-500/80 to-lime-400/80 text-xs uppercase tracking-[0.3em] text-zinc-900"
-                    onClick={() => setTaskId(task.id)}
-                  >
-                    {taskId === task.id ? "Seçildi" : "Bu görevi seç"}
-                  </Button>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Görev bulunamadı.
-              </p>
-            )}
-          </div>
-        </ScrollArea>
-      </section>
+
       <Separator className="border-emerald-800/60" />
       <p className="text-xs text-emerald-200/70">
-        Kanıtın 3 saat içinde incelenecek ve onaylanacaktır.
-        Herhangi bir sorun yaşarsanız bizle iletişime geç.
+        Kanıtın 3 saat içinde incelenecek ve onaylanacaktır. Herhangi bir sorun
+        yaşarsanız bizle iletişime geç.
       </p>
     </main>
   );

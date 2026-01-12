@@ -17,6 +17,9 @@ export async function GET(request: NextRequest) {
     .select("*")
     .eq("user_id", userId)
     .single();
+  if(error?.code === 'PGRST116') {
+    return Response.json({ error: "lütfen kodumu inceleme" }, { status: 599 });
+  }
 
   if (error) {
     console.error(error);

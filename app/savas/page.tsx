@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Loading from "@/app/loading";
-import DragonComponent from "@/components/dragon";
 import type { UserProfile } from "@/app/page";
-import { dragonPowerScore, xpToLevel } from "@/lib/progression";
+import { xpToLevel } from "@/lib/progression";
 import { textToColor } from "@/lib/profile";
+import DragonVisuals from "@/components/dragon-visuals";
 
 interface FightReport {
   me: UserProfile;
@@ -60,15 +60,30 @@ export default function FightPage() {
       setIsFighting(false);
     }
   }, [me]);
+  const [isExcited, setIsExcited] = useState(false);
+
+  useEffect(() => {
+    if (!isExcited) return;
+    const timeout = setTimeout(() => setIsExcited(false), 1200);
+    return () => clearTimeout(timeout);
+  }, [isExcited]);
+
+  const dragonPose = isExcited
+    ? "scale-110 rotate-3 animate-pulse "
+    : ("animate-bounce");
 
   if (isLoading || !me) {
     return <Loading />;
   }
 
   return (
-    <div className="flex min-h-screen flex-col gap-6 bg-gradient-to-b from-[#021505] via-[#0c2b16] to-[#1c4325] p-4 text-emerald-50">
+    <div className="flex justify-between min-h-screen flex-col gap-6 bg-gradient-to-b via-green-900 from-lime-950 to-[#1c4325] p-4 text-emerald-50">
       <header className="flex items-center justify-between rounded-2xl border border-emerald-700/30 bg-white/5 px-4 py-3 shadow-lg shadow-emerald-900/40 backdrop-blur">
-        <Button variant="ghost" asChild className="text-emerald-100 hover:bg-emerald-500/10">
+        <Button
+          variant="ghost"
+          asChild
+          className="text-emerald-100 hover:bg-emerald-500/10"
+        >
           <Link href="/">← Ana Sayfa</Link>
         </Button>
         <div className="flex items-center gap-3 rounded-full border border-emerald-600/40 bg-emerald-900/40 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em]">
@@ -78,14 +93,20 @@ export default function FightPage() {
           </Badge>
         </div>
       </header>
-      <section className="flex flex-col items-center gap-4 rounded-3xl border border-emerald-700/30 bg-emerald-900/30 p-6 shadow-inner shadow-black/40">
-        <DragonComponent {...me} />
-        <div className="flex flex-wrap justify-center gap-3 text-[10px] uppercase tracking-[0.35em] text-emerald-200/90">
-          <span className="rounded-full border border-emerald-500/30 bg-emerald-700/30 px-4 py-1">xp · {me.total_xp}</span>
-          <span className="rounded-full border border-emerald-500/30 bg-emerald-700/30 px-4 py-1">coin · {me.coins}</span>
-          <span className="rounded-full border border-emerald-500/30 bg-emerald-700/30 px-4 py-1">güç · {dragonPowerScore(me.total_xp, me.coins)}</span>
-        </div>
-      </section>
+      <div className="mx-auto">
+        <button
+          type="button"
+          onClick={() => setIsExcited(true)}
+          className={`relative isolate flex h-48 w-48 items-center justify-center rounded-full bg-gradient-to-r from-lime-300/20 via-emerald-400/30 to-lime-200/20 text-6xl text-white shadow-[0_0_35px_rgba(124,255,170,0.4)] ring-2 ring-white/10 transition-all duration-400 ${dragonPose}`}
+          aria-label="ejderhayı sev"
+        >
+          <DragonVisuals
+            me={me}
+            sad={report?.winnerId !== report?.me.user_id}
+          />
+          <span className="absolute inset-0 -z-10 rounded-full bg-lime-400/20 blur-3xl" />
+        </button>
+      </div>
       <section className="rounded-3xl border border-emerald-600/40 bg-[#0a1c11]/80 p-4 shadow-[0_0_40px_rgba(5,40,15,0.6)] backdrop-blur">
         <div className="flex flex-col gap-4">
           {report ? (
@@ -108,10 +129,16 @@ export default function FightPage() {
                 />
               </div>
               <div className="flex flex-wrap gap-3 text-sm">
-                <Badge variant="secondary" className="border border-lime-300/50 bg-lime-400/10 text-lime-50">
+                <Badge
+                  variant="secondary"
+                  className="border border-lime-300/50 bg-lime-400/10 text-lime-50"
+                >
                   +{report.reward.xp} XP
                 </Badge>
-                <Badge variant="secondary" className="border border-amber-300/40 bg-amber-400/10 text-amber-100">
+                <Badge
+                  variant="secondary"
+                  className="border border-amber-300/40 bg-amber-400/10 text-amber-100"
+                >
                   +{report.reward.coins} Coin
                 </Badge>
                 <span className="text-emerald-200/60">
@@ -121,18 +148,22 @@ export default function FightPage() {
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Ejderhan hazır. Rakip bulmak için Savaş başlat.
+              {me.fights_left <= 0
+                ? "Ejderhan yoruldu, bugün daha fazla savaşamazsın."
+                : "Ejderhan hazır. Rakip bulmak için Savaş başlat."}
             </p>
           )}
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <Button
             onClick={handleFight}
-            disabled={isFighting}
+            disabled={isFighting || me.fights_left <= 0}
             className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400 py-6 text-lg font-semibold text-zinc-900 shadow-lg shadow-emerald-900/50 transition-transform hover:scale-[1.02] disabled:opacity-60"
           >
-            {isFighting ? "Savaş başlıyor..." : "Savaş başlat"}
+            {me.fights_left <= 0
+              ? "Hakların bitti"
+              : isFighting
+                ? "Savaş başlıyor..."
+                : "Savaş başlat"}
           </Button>
         </div>
       </section>
@@ -140,7 +171,17 @@ export default function FightPage() {
   );
 }
 
-function FighterCard({ label, user, power, isWinner }: { label: string; user: UserProfile; power: number; isWinner: boolean }) {
+function FighterCard({
+  label,
+  user,
+  power,
+  isWinner,
+}: {
+  label: string;
+  user: UserProfile;
+  power: number;
+  isWinner: boolean;
+}) {
   return (
     <div
       className={`rounded-2xl border p-4 transition-all duration-300 ${
@@ -152,9 +193,7 @@ function FighterCard({ label, user, power, isWinner }: { label: string; user: Us
       <div className="flex items-center gap-3">
         <Avatar>
           <AvatarImage alt={user.name} />
-          <AvatarFallback
-            style={{ backgroundColor: textToColor(user.name) }}
-          >
+          <AvatarFallback style={{ backgroundColor: textToColor(user.name) }}>
             {user.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>

@@ -1,60 +1,93 @@
 import { NextResponse } from "next/server";
 import { dragonPowerScore, xpToLevel } from "@/lib/progression";
-import type { UserProfile } from "@/app/page";
+import { createClient } from "@/lib/supabase/server";
 
 const WIN_REWARD = { xp: 80, coins: 35 };
 const LOSS_REWARD = { xp: 25, coins: 10 };
 
 export async function POST(request: Request) {
   try {
-    const url = new URL(request.url);
-    const origin = `${url.protocol}//${url.host}`;
-    const cookie = request.headers.get("cookie") ?? "";
-    const fetchInit: RequestInit = {
-      headers: { cookie },
-      cache: "no-store",
-    };
-
-    const meRes = await fetch(`${origin}/api/info`, fetchInit);
-    if (!meRes.ok) {
-      return NextResponse.json({ error: "me bilgisi alınamadı" }, { status:  meRes.status });
+    const supabase = await createClient();
+    // supabase claims fetch shiiiii
+    const { data: authData, error: authError } =
+      await supabase.auth.getClaims();
+    if (authError || !authData) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const mePayload = await meRes.json();
-    const me: UserProfile = mePayload.data ?? mePayload;
 
-    const leaderRes = await fetch(`${origin}/api/leaderboard`, fetchInit);
-    if (!leaderRes.ok) {
-      return NextResponse.json({ error: "rakip listesi yok" }, { status: leaderRes.status });
+    const userId = authData.claims.sub;
+    const { data: me, error: meError } = await supabase
+      .from("profiles")
+      .select("user_id,name,class,total_xp,coins,fights_left")
+      .eq("user_id", userId)
+      .single();
+
+    if (meError || !me) {
+      return NextResponse.json({ error: "profil bulunamadı" }, { status: 404 });
     }
-    const leaderPayload = await leaderRes.json();
-    const roster: UserProfile[] = leaderPayload.data ?? leaderPayload ?? [];
-    const opponents = roster.filter((user) => user.user_id !== me.user_id);
+
+    if (me.fights_left <= 0) {
+      return NextResponse.json(
+        { error: "bugünlük savaş hakkın kalmadı" },
+        { status: 429 },
+      );
+    }
+
+    const { data: roster, error: rosterError } = await supabase
+      .from("profiles")
+      .select("user_id,name,class,total_xp,coins")
+      .neq("user_id", userId)
+      .limit(500);
+    if (rosterError) {
+      return NextResponse.json({ error: "rakip listesi yok" }, { status: 500 });
+    }
+
+    const opponents = roster ?? [];
     if (!opponents.length) {
-      // shit nobody else to fight
-      return NextResponse.json({ error: "sadece sen varsın" }, { status: 409 });
+      return NextResponse.json(
+        { error: "dünya senin etrafında dönüyor" },
+        { status: 404 },
+      );
     }
 
-    const opponent =
-      opponents[Math.floor(Math.random() * opponents.length)];
+    const opponent = opponents[Math.floor(Math.random() * opponents.length)];
     const mePower = dragonPowerScore(me.total_xp, me.coins);
     const opponentPower = dragonPowerScore(opponent.total_xp, opponent.coins);
     const meWins =
       mePower === opponentPower ? Math.random() > 0.5 : mePower > opponentPower;
     const reward = meWins ? WIN_REWARD : LOSS_REWARD;
 
-    const updatedMe: UserProfile = {
+    const updatedMe = {
       ...me,
       total_xp: me.total_xp + reward.xp,
       coins: me.coins + reward.coins,
+      fights_left: me.fights_left - 1,
     };
 
+    const { data: persisted, error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        total_xp: updatedMe.total_xp,
+        coins: updatedMe.coins,
+        fights_left: updatedMe.fights_left,
+      })
+      .eq("user_id", userId)
+      .select("user_id,name,class,total_xp,coins")
+      .single();
+    if (updateError || !persisted) {
+      return NextResponse.json(
+        { error: "profil güncellenmedi shit" },
+        { status: 500 },
+      );
+    }
+
     const message = meWins
-      ? `${me.name} ejderhası seviye ${xpToLevel(updatedMe.total_xp)} ile ateş püskürttü!`
+      ? `${me.name} seviye ${xpToLevel(updatedMe.total_xp)} ejderiyle dehşet saçtı!`
       : `${opponent.name} bu raundu aldı, ama ${me.name} ekstra antrenmanla dönecek.`;
 
     return NextResponse.json(
       {
-        me: updatedMe,
+        me: persisted,
         opponent,
         winnerId: meWins ? me.user_id : opponent.user_id,
         dragonPower: { me: mePower, opponent: opponentPower },
@@ -65,10 +98,6 @@ export async function POST(request: Request) {
       { headers: { "cache-control": "no-store" } },
     );
   } catch (error) {
-    return NextResponse.json(
-      { error: "savaş başarısız" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "savaş başarısız" }, { status: 500 });
   }
 }
-

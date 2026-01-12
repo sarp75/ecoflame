@@ -19,8 +19,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import DragonComponent from "@/components/dragon";
 import { xpToLevel } from "@/lib/progression";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; //import { textToColor } from "@/lib/profile";
 
 //import { textToColor } from "@/lib/profile";
+
+/*
+  did u know
+  llms fail at parsing ascii text as well
+                              _
+                             (_)
+         ___  __ _ _ __ _ __  _ _ __  _   _  ___
+        / __|/ _` | '__| '_ \| | '_ \| | | |/ _ \
+        \__ \ (_| | |  | |_) | | | | | |_| | (_) |
+        |___/\__,_|_|  | .__/|_|_| |_|\__, |\___/
+                       | |             __/ |
+                       |_|            |___/
+
+*/
 
 export interface UserProfile {
   user_id: string;
@@ -28,6 +44,11 @@ export interface UserProfile {
   class: string;
   total_xp: number;
   coins: number;
+  fights_left: number;
+}
+interface ClassLeaderboardRow {
+  class: string;
+  t_xp: number;
 }
 export interface Task {
   id: string;
@@ -45,10 +66,17 @@ export default function Page() {
   const [globalLeaders, setGlobalLeaders] = useState<UserProfile[] | null>(
     null,
   );
+  const [classLeaders, setClassLeaders] = useState<
+    ClassLeaderboardRow[] | null
+  >(null);
   useEffect(() => {
     const loadMe = async () => {
-      const res = await fetch("/api/info", { next: { revalidate: 30 } });
-      if (!res.ok) return;
+      const res = await fetch("/api/info");
+      if (res.status === 599) {
+        window.location.href = "/auth/sign-up-success";
+        return;
+      }
+      if (!res.ok) toast.error("Bir hata oluştu");
 
       const json = await res.json();
       setMe(json.data);
@@ -96,6 +124,18 @@ export default function Page() {
     const json = await res.json();
     setGlobalLeaders(json.data ?? json);
   };
+  const fetchClassLeaders = async () => {
+    if (!me) throw new Error("User not loaded yet");
+    setClassLeaders(null);
+    const res = await fetch("/api/classboard", {
+      method: "POST",
+      cache: "no-store",
+      body: JSON.stringify({ wantedClass: me.class }),
+    });
+    if (!res.ok) throw new Error("Failed to fetch classboard");
+    const json = await res.json();
+    setClassLeaders(json.data ?? json);
+  };
   //const filteredTasks = tasks.filter((task) => mapTaskToTab(task) === taskTab);
 
   /*useEffect(() => {
@@ -114,7 +154,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex flex-col p-3 justify-between h-screen w-screen">
+    <div className="flex flex-col p-3 justify-between h-screen w-screen bg-gradient-to-b bg-linear-to-r from-lime-700 via-emerald-400 to-emerald-600 ">
       <div className="flex flex-row gap-2 w-full justify-between" id="header">
         <div className="flex flex-row gap-2 items-center">
           <Avatar>
@@ -361,78 +401,142 @@ export default function Page() {
           <DrawerTrigger asChild>
             <Button
               className="h-full flex-1"
-              onClick={() => fetchGlobalLeaders()}
+              onClick={() => {
+                fetchGlobalLeaders();
+                fetchClassLeaders();
+              }}
             >
               Sıralama
             </Button>
           </DrawerTrigger>
           <DrawerContent>
-            <div className="mx-auto w-full max-w-sm">
-              <DrawerHeader>
-                <DrawerTitle className="text-xl">Global Sıralama</DrawerTitle>
-              </DrawerHeader>
-              <ScrollArea className="w-full h-92 mb-8 rounded-md border">
-                <div className="p-4 space-y-2">
-                  {globalLeaders ? (
-                    globalLeaders.map((user, index) => (
-                      <React.Fragment key={user.user_id}>
-                        {index > 0 && <Separator className="my-2" />}
-                        <div
-                          className={cn(
-                            "flex items-center gap-3",
-                            user.user_id === me.user_id ? "font-semibold" : "",
-                          )}
-                        >
-                          <Badge variant="secondary">{index + 1}</Badge>
-                          <Avatar>
-                            <AvatarImage alt={user.name} />
-                            <AvatarFallback
-                              style={{
-                                backgroundColor: textToColor(user.name),
-                              }}
+            <Tabs className="w-full max-w-md px-8" defaultValue="global">
+              <TabsList className="w-full justify-evenly  mt-4">
+                <TabsTrigger value="global">Global</TabsTrigger>
+                <TabsTrigger value="class">Sınıf</TabsTrigger>
+              </TabsList>
+              <TabsContent value="global">
+                <div className="mx-auto w-full max-w-sm">
+                  <ScrollArea className="w-full h-92 mb-8 rounded-md border">
+                    <div className="p-4 space-y-2">
+                      {globalLeaders ? (
+                        globalLeaders.map((user, index) => (
+                          <React.Fragment key={user.user_id}>
+                            {index > 0 && <Separator className="my-2" />}
+                            <div
+                              className={cn(
+                                "flex items-center gap-3",
+                                user.user_id === me.user_id
+                                  ? "font-semibold"
+                                  : "",
+                              )}
                             >
-                              {user.name.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col flex-1">
-                            <span className="text-sm dark:text-white">
-                              {user.name}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {user.class}
-                            </span>
+                              <Badge variant="secondary">{index + 1}</Badge>
+                              <Avatar>
+                                <AvatarImage alt={user.name} />
+                                <AvatarFallback
+                                  style={{
+                                    backgroundColor: textToColor(user.name),
+                                  }}
+                                >
+                                  {user.name.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col flex-1">
+                                <span className="text-sm dark:text-white">
+                                  {user.name}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {user.class}
+                                </span>
+                              </div>
+                              <Badge
+                                variant="default"
+                                className="h-5 min-w-5 rounded-full px-1 text-center bg-blue-500"
+                              >
+                                {xpToLevel(user.total_xp)}
+                              </Badge>
+                              <Badge
+                                variant="default"
+                                className="h-6 min-w-6 rounded-full px-1 text-center bg-green-500"
+                              >
+                                {user.coins}
+                              </Badge>
+                            </div>
+                          </React.Fragment>
+                        ))
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-6 w-6 rounded-full" />
+                            <Skeleton className="h-8 w-32" />
                           </div>
-                          <Badge
-                            variant="default"
-                            className="h-5 min-w-5 rounded-full px-1 text-center bg-blue-500"
-                          >
-                            {xpToLevel(user.total_xp)}
-                          </Badge>
-                          <Badge
-                            variant="default"
-                            className="h-6 min-w-6 rounded-full px-1 text-center bg-green-500"
-                          >
-                            {user.coins}
-                          </Badge>
-                        </div>
-                      </React.Fragment>
-                    ))
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-6 w-6 rounded-full" />
-                        <Skeleton className="h-8 w-32" />
-                      </div>
-                      <Separator className="my-2" />
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-6 w-6 rounded-full" />
-                        <Skeleton className="h-8 w-32" />
-                      </div>
-                    </>
-                  )}
+                          <Separator className="my-2" />
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-6 w-6 rounded-full" />
+                            <Skeleton className="h-8 w-32" />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </ScrollArea>
                 </div>
-              </ScrollArea>
-            </div>
+              </TabsContent>
+              <TabsContent value="class">
+                <div className="mx-auto w-full max-w-sm">
+                  <ScrollArea className="w-full h-92 mb-8 rounded-md border">
+                    <div className="p-4 space-y-2">
+                      {classLeaders ? (
+                        classLeaders.map((entry, index) => (
+                          <React.Fragment key={entry.class}>
+                            {index > 0 && <Separator className="my-2" />}
+                            <div className="flex items-center gap-3">
+                              <Badge variant="secondary">{index + 1}</Badge>
+                              <Avatar>
+                                <AvatarImage alt={entry.class} />
+                                <AvatarFallback
+                                  style={{
+                                    backgroundColor: textToColor(entry.class),
+                                  }}
+                                >
+                                  {entry.class.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col flex-1">
+                                <span className="text-sm dark:text-white">
+                                  {entry.class}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  Toplam XP
+                                </span>
+                              </div>
+                              <Badge
+                                variant="default"
+                                className="h-5 min-w-5 rounded-full px-1 text-center bg-blue-500"
+                              >
+                                {entry.t_xp}
+                              </Badge>
+                            </div>
+                          </React.Fragment>
+                        ))
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-6 w-6 rounded-full" />
+                            <Skeleton className="h-8 w-32" />
+                          </div>
+                          <Separator className="my-2" />
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-6 w-6 rounded-full" />
+                            <Skeleton className="h-8 w-32" />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </TabsContent>
+            </Tabs>
           </DrawerContent>
         </Drawer>
       </div>
