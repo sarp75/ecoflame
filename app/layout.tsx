@@ -13,7 +13,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className={`antialiased dark h-screen max-h-screen overflow-hidden`}>
+      <head>
+        <title>Ecoflame</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="description"
+          content="Ecoflame is a gamified environmental app that rewards users for eco-friendly actions."
+        />
+        <link rel="icon" href="/images/i-1.png" />
+      </head>
+      <body
+        className={`antialiased dark h-screen max-h-screen overflow-hidden`}
+      >
         <Toaster className="select-none" />
         {children}
       </body>
