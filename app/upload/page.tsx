@@ -31,7 +31,8 @@ type UploadResult = {
 
 export default function UploadPage() {
   const params = useSearchParams();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskId, setTaskId] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -40,6 +41,9 @@ export default function UploadPage() {
   >("idle");
   const [message, setMessage] = useState("");
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [capturedUrl, setCapturedUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const initial = params?.get("task_id");
@@ -65,7 +69,7 @@ export default function UploadPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!file) {
-      setMessage("Lütfen bir dosya seç.");
+      setMessage("Lütfen önce fotoğraf çek.");
       return;
     }
     setStatus("uploading");
@@ -89,8 +93,9 @@ export default function UploadPage() {
       setUploadResult(payload as UploadResult);
       setMessage("Yükleme tamamlandı.");
       setFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      setCapturedUrl(null);
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
       }
     } catch (err: any) {
       setStatus("error");
@@ -98,6 +103,97 @@ export default function UploadPage() {
       setUploadResult(null);
     }
   };
+
+  const handleCapture = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) {
+      return;
+    }
+    const width = video.videoWidth;
+    const height = video.videoHeight;
+    if (!width || !height) {
+      setMessage("Kamera hazır değil.");
+      return;
+    }
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      setMessage("Kayıt oluşturulamadı.");
+      return;
+    }
+    context.drawImage(video, 0, 0, width, height);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          setMessage("Fotoğraf kaydedilemedi.");
+          return;
+        }
+        if (capturedUrl) {
+          URL.revokeObjectURL(capturedUrl);
+        }
+        const proofFile = new File([blob], `proof-${Date.now()}.jpg`, {
+          type: blob.type,
+        });
+        setFile(proofFile);
+        setCapturedUrl(URL.createObjectURL(blob));
+      },
+      "image/jpeg",
+      0.92,
+    );
+  };
+
+  const handleRetake = () => {
+    if (capturedUrl) {
+      URL.revokeObjectURL(capturedUrl);
+    }
+    setCapturedUrl(null);
+    setFile(null);
+    setMessage("");
+  };
+
+  useEffect(() => {
+    let activeStream: MediaStream | null = null;
+
+    const initCamera = async () => {
+      try {
+        if (
+          typeof navigator === "undefined" ||
+          !navigator.mediaDevices?.getUserMedia
+        ) {
+          setCameraError("Cihaz kameraya erişimi desteklemiyor.");
+          return;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false,
+        });
+        activeStream = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setCameraReady(true);
+        setCameraError(null);
+      } catch {
+        setCameraError("Kameraya erişilemedi, izinleri kontrol et.");
+      }
+    };
+
+    initCamera();
+
+    return () => {
+      activeStream?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (capturedUrl) {
+        URL.revokeObjectURL(capturedUrl);
+      }
+    };
+  }, [capturedUrl]);
 
   return (
     <main className="min-h-screen w-full flex flex-col space-y-6 bg-gradient-to-b from-[#041306] via-[#0c2412] to-[#163b25] px-4 py-6 text-emerald-50 sm:px-10 sm:py-10">
@@ -121,7 +217,7 @@ export default function UploadPage() {
       <section className="space-y-2">
         <h1 className="text-2xl font-semibold dark:text-white">Kanıt yükle</h1>
         <p className="text-sm text-muted-foreground">
-          Görevi seç, kanıtını ekle ve uzak yükleme servisine gönder.
+          Görevi seç, kanıtını ekle ve ödülünü al.
         </p>
       </section>
       {selectedTask ? (
@@ -146,44 +242,10 @@ export default function UploadPage() {
           Bir hata oluştu, lütfen bir görev seçin.
         </div>
       )}
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4 rounded-3xl border border-emerald-600/40 bg-[#07140b]/70 p-6 shadow-[0_0_45px_rgba(0,0,0,0.7)] backdrop-blur"
-      >
-        <div className="grid gap-2">
-          <label className="text-sm font-medium text-emerald-100">Dosya</label>
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="rounded-xl border border-emerald-700/40 bg-[#0f2515] px-3 py-2 text-sm text-emerald-50 file:text-emerald-100"
-            onChange={(event) => setFile(event.target.files?.[0] || null)}
-            accept="image/*,application/pdf"
-            required
-          />
-        </div>
-        <Button
-          type="submit"
-          className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400 py-4 text-lg font-semibold text-zinc-900 shadow-lg shadow-emerald-900/60 transition-transform hover:scale-[1.02]"
-          disabled={status === "uploading"}
-        >
-          {status === "uploading" ? "Yükleniyor..." : "Gönder"}
-        </Button>
-        {message && <p className={cnStatusClass(status)}>{message}</p>}
-      </form>
-      {uploadResult && (
+
+      {uploadResult ? (
         <div className="space-y-3 rounded-3xl border border-emerald-600/40 bg-[#0b1e12]/85 p-5 shadow-lg shadow-black/60">
           <h2 className="text-lg font-semibold dark:text-white">Son yükleme</h2>
-          <p className="text-sm text-emerald-200/90">
-            URL:{" "}
-            <a
-              href={uploadResult.proof_url}
-              target="_blank"
-              rel="noreferrer"
-              className="text-lime-300 underline decoration-dotted"
-            >
-              {uploadResult.proof_url}
-            </a>
-          </p>
           <p className="text-sm text-muted-foreground">
             Tarih: {new Date(uploadResult.created_at).toLocaleString()}
           </p>
@@ -224,6 +286,74 @@ export default function UploadPage() {
             </div>
           )}
         </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 rounded-3xl border border-emerald-600/40 bg-[#07140b]/70 p-6 shadow-[0_0_45px_rgba(0,0,0,0.7)] backdrop-blur"
+        >
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-emerald-100">
+              Kanıt Fotoğrafı
+            </label>
+            <div className="relative aspect-[1/1] overflow-hidden rounded-2xl border border-emerald-700/40 bg-[#0f2515]">
+              {cameraError ? (
+                <p className="p-6 text-center text-sm text-rose-200">
+                  {cameraError}
+                </p>
+              ) : capturedUrl ? (
+                <img
+                  src={capturedUrl}
+                  alt="Çekilen kanıt"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="h-full w-full object-cover"
+                />
+              )}
+              <canvas ref={canvasRef} className="hidden" />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                className="flex-1 rounded-2xl"
+                onClick={capturedUrl ? handleRetake : handleCapture}
+                disabled={
+                  !!cameraError ||
+                  status === "uploading" ||
+                  (!cameraReady && !capturedUrl)
+                }
+              >
+                {capturedUrl ? "Tekrar Çek" : "Fotoğraf Çek"}
+              </Button>
+              {!capturedUrl && (
+                <Button
+                  type="button"
+                  className="flex-1 rounded-2xl"
+                  onClick={handleCapture}
+                  disabled={
+                    !!cameraError || status === "uploading" || !cameraReady
+                  }
+                >
+                  Çek ve Onayla
+                </Button>
+              )}
+            </div>
+          </div>
+          <Button
+            type="submit"
+            className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400 py-4 text-lg font-semibold text-zinc-900 shadow-lg shadow-emerald-900/60 transition-transform hover:scale-[1.02]"
+            disabled={status === "uploading" || !file}
+          >
+            {status === "uploading" ? "Yükleniyor..." : "Gönder"}
+          </Button>
+          {message && <p className={cnStatusClass(status)}>{message}</p>}
+        </form>
       )}
 
       <Separator className="border-emerald-800/60" />
