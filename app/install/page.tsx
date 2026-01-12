@@ -54,7 +54,7 @@ export default function InstallPage() {
       <div className="w-full max-w-sm space-y-4 rounded-3xl border border-emerald-600/40 bg-[#081c10]/85 p-6 text-center shadow-[0_0_45px_rgba(5,30,15,0.7)] backdrop-blur">
         <h1 className="text-2xl font-semibold text-white">Ecoflame Kurulum</h1>
         <p className="text-sm text-emerald-200/80">
-          uygulamayı indir
+          Uygulamayı indir
         </p>
         <Button
           onClick={triggerInstall}

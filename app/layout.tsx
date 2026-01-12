@@ -21,6 +21,8 @@ export default function RootLayout({
           content="Ecoflame is a gamified environmental app that rewards users for eco-friendly actions."
         />
         <link rel="icon" href="/images/i-1.png" />
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="manifest" href="/manifest.json"/>
       </head>
       <body
         className={`antialiased dark h-screen max-h-screen overflow-hidden`}

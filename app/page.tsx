@@ -20,7 +20,8 @@ import Link from "next/link";
 import DragonComponent from "@/components/dragon";
 import { xpToLevel } from "@/lib/progression";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; //import { textToColor } from "@/lib/profile";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { type DecisionResult, evaluateDecision } from "@/lib/player-decision";
 
 //import { textToColor } from "@/lib/profile";
 
@@ -63,6 +64,7 @@ export default function Page() {
   const [myClass, setMyClass] = useState<UserProfile[] | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [decision, setDecision] = useState<DecisionResult | null>(null);
   const [globalLeaders, setGlobalLeaders] = useState<UserProfile[] | null>(
     null,
   );
@@ -136,6 +138,31 @@ export default function Page() {
     const json = await res.json();
     setClassLeaders(json.data ?? json);
   };
+  useEffect(() => {
+    if (!me || !selectedTask) {
+      setDecision(null);
+      return;
+    }
+    try {
+      const result = evaluateDecision(
+        {
+          id: me.user_id,
+          level: xpToLevel(me.total_xp),
+          skill: Math.max(1, xpToLevel(me.total_xp) * 10),
+          habitScore: me.fights_left,
+        },
+        {
+          id: selectedTask.id,
+          reward: selectedTask.xp,
+          difficulty: Math.max(1, selectedTask.xp / 2),
+        },
+      );
+      setDecision(result);
+    } catch (err) {
+      console.warn("decision model failed", err);
+      setDecision(null);
+    }
+  }, [me, selectedTask]);
   //const filteredTasks = tasks.filter((task) => mapTaskToTab(task) === taskTab);
 
   /*useEffect(() => {
@@ -378,6 +405,25 @@ export default function Page() {
                       <p className="text-sm text-muted-foreground">
                         {selectedTask.desc || "Kanıtını yükleyerek tamamla."}
                       </p>
+                      {/*decision ? (
+                        <div className="rounded-md border p-3 space-y-1 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span>Başlama ihtimali</span>
+                            <span className="font-semibold">
+                              {Math.round(decision.probability * 100)}%
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-muted-foreground">
+                            <span>Akış oranı</span>
+                            <span>{decision.flowRatio.toFixed(2)}</span>
+                          </div>
+                          {decision.flowWarning ? (
+                            <p className="text-amber-600 text-[11px]">
+                              {decision.flowWarning}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null*/}
                       <div className="flex items-center gap-3">
                         <Badge variant="outline">+{selectedTask.xp} XP</Badge>
                         <Button asChild className="flex-1">

@@ -1,0 +1,21 @@
+{
+  "name": "Ecoflame",
+  "short_name": "Ecoflame",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "theme_color": "green",
+  "description": "Ecoflame is an app that promotes environmental awareness through fun and engaging gameplay.",
+  "background_color": "green",
+  "display": "standalone"
+}
