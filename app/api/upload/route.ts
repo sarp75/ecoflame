@@ -289,6 +289,7 @@ async function validateProofWithGemini(
       }
 
       const data = await response.json();
+      console.log(data);
       const rawText = (data?.candidates?.[0]?.content?.parts ?? [])
         .map((part: any) => part?.text || "")
         .join("")
@@ -435,7 +436,7 @@ function inferVerdictFromFreeText(
 
 function containsStrongNegativeSignals(text: string): boolean {
   const lowered = text.toLowerCase();
-  return [
+  const phrases = [
     "does not",
     "no evidence",
     "not evidence",
@@ -444,7 +445,28 @@ function containsStrongNegativeSignals(text: string): boolean {
     "cannot see",
     "missing proof",
     "fails to",
-  ].some((phrase) => lowered.includes(phrase));
+    "impossible to discern",
+    "impossible to determine",
+    "too dark",
+    "too blurry",
+    "dark and blurry",
+    "dark blurry",
+    "blurry",
+    "unclear",
+    "cannot discern",
+    "cannot identify",
+    "cannot determine",
+    "cannot make out",
+    "cannot recognize",
+    "not visible",
+    "no visible",
+    "no visibility",
+    "lack of visibility",
+  ];
+  if (phrases.some((phrase) => lowered.includes(phrase))) {
+    return true;
+  }
+  return /can'?t\s+(see|identify|discern|determine)/.test(lowered);
 }
 
 function wait(ms: number) {
