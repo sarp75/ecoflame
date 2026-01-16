@@ -339,11 +339,11 @@ function normalizeVerdict(
   verdict: string | undefined,
 ): GeminiDecision["verdict"] {
   const lowered = verdict?.toLowerCase() || "";
-  if (lowered.includes("valid") || lowered.includes("approve")) {
-    return "valid";
-  }
   if (lowered.includes("invalid") || lowered.includes("reject")) {
     return "invalid";
+  }
+  if (lowered.includes("valid") || lowered.includes("approve")) {
+    return "valid";
   }
   if (lowered.includes("review") || lowered.includes("pending")) {
     return "needs_review";
@@ -352,6 +352,7 @@ function normalizeVerdict(
 }
 
 function safeJsonParse<T>(payload: string | undefined): T | null {
+  console.log("safeJsonParse payload:", payload);
   if (!payload) {
     return null;
   }
@@ -373,22 +374,23 @@ function safeJsonParse<T>(payload: string | undefined): T | null {
 }
 
 // fallback parser shiiiii when gemini sends plain text
-function parseGeminiTextVerdict(
-  rawText: string,
-): GeminiModelResponse | null {
+function parseGeminiTextVerdict(rawText: string): GeminiModelResponse | null {
   if (!rawText?.trim()) {
     return null;
   }
   const cleaned = rawText.trim();
-  const verdictHint =
-    cleaned.match(/(?:ai kararı|verdict)\s*[:\-]\s*([a-z_\s]+)/i)?.[1];
+  const verdictHint = cleaned.match(
+    /(?:ai kararı|verdict)\s*[:\-]\s*([a-z_\s]+)/i,
+  )?.[1];
   const normalizedHint =
     verdictHint && verdictHint.trim()
       ? normalizeVerdict(verdictHint)
       : "unknown";
   const fallbackVerdict = inferVerdictFromFreeText(cleaned);
   let verdict =
-    normalizedHint !== "unknown" ? normalizedHint : fallbackVerdict || "unknown";
+    normalizedHint !== "unknown"
+      ? normalizedHint
+      : fallbackVerdict || "unknown";
   if (verdict !== "invalid" && containsStrongNegativeSignals(cleaned)) {
     verdict = "invalid";
   }
@@ -474,7 +476,7 @@ function wait(ms: number) {
 }
 
 function extractUguuUrl(payload: string): string {
-  // this shit first tries json because uguu loves info dumps
+  // cuz uguu loves info dumps
   const parsed = safeJsonParse<{ files?: { url?: string }[]; url?: string }>(
     payload,
   );
