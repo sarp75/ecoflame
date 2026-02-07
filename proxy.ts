@@ -16,8 +16,8 @@ export const config = {
      * - install cuz it's a one-time setup route
      * - /images cuz it's a folder with static images and shit
      * - /api cuz i don't wanna have a shitload of latency on api routes
-     * Feel free to modify this pattern to include more paths.
+     * - showcase cuz its full of static hero shit
      */
-    "/((?!_next/static|_next/image|images|install|api|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|images|install|api|showcase|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
