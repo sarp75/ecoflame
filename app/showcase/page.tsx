@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import Loading from "@/app/loading";
 import { initLangCookie, Lang, setLangCookie } from "@/lib/lang";
+import { CometCard } from "@/components/ui/comet-card";
 
 type Copy = { tr: string; en: string };
 
@@ -63,18 +64,22 @@ const roadmap = [
 const team = [
   {
     name: "Can Doe",
-    role: "Lead Chemistry",
+    role: { tr: "Lider Bilimci", en: "Lead Scientist" },
     image: "/images/dragons/head2.png",
   },
-  { name: "Sarp Pamuk", role: "Lead Developer", image: "/images/i-32.png" },
-  { name: "Nisa Doe", role: "Lead Artist", image: "/images/i-14.png" },
+  {
+    name: "Sarp Pamuk",
+    role: { tr: "Lider Geliştirici", en: "Lead Developer" },
+    image: "/images/i-32.png",
+  },
+  {
+    name: "Nisa Doe",
+    role: { tr: "Lider Sanatçı", en: "Lead Artist" },
+    image: "/images/i-14.png",
+  },
 ];
 
-const partners = [
-  { name: "Okulunuz", image: "/images/i-22.png" },
-  { name: "Belediye Adayı", image: "/images/i-23.png" },
-  { name: "Open for Partnership", image: "/images/i-3.png" },
-];
+
 
 type StatKey = "pilots" | "accuracy" | "breakdown";
 
@@ -107,12 +112,18 @@ const stats: Stat[] = [
 ];
 
 export default function ShowcasePage() {
+
   const [counts, setCounts] = React.useState<Record<StatKey, number>>({
     pilots: 0,
     accuracy: 0,
     breakdown: 0,
   });
   const [lang, setLang] = useState<Lang>("en");
+  const partners = [
+    { name: (sarpTr("İzmir Atatürk Lisesi", "Izmir Atatürk Highschool") ), image: "/images/i-22.png" },
+    { name: (sarpTr("İZSU", "IZSU")), image: "/images/i-23.png" },
+    { name: (sarpTr("Partnerliğe açığız", "Open for partnership")), image: "/images/i-3.png" },
+  ];
 
   React.useEffect(() => {
     const targets: Record<StatKey, number> = {
@@ -156,7 +167,7 @@ export default function ShowcasePage() {
           className="absolute top-15 right-15 text-3xl z-50 select-none hover:scale-110 transition cursor-pointer"
           onClick={() => changeLang(lang === "tr" ? "en" : "tr")}
         >
-          {lang === "tr" ? "🇹🇷" : "🇬🇧"}
+          {lang === "tr" ? "????" : "????"}
         </div>
         <div className="absolute inset-0 grid grid-cols-1 lg:grid-cols-2 opacity-80">
           <div className="relative">
@@ -215,12 +226,6 @@ export default function ShowcasePage() {
         </div>
 
         <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-8 px-6 py-20 text-center">
-          <Badge
-            variant="secondary"
-            className="bg-white/10 text-white backdrop-blur"
-          >
-            {sarpTr("Bölüm 1: Giriş Ekranı", "Section 1: Intro")}
-          </Badge>
           <div className="space-y-4">
             <p className="text-sm uppercase tracking-[0.3em] text-emerald-200/80">
               ECOFLAME
@@ -269,12 +274,7 @@ export default function ShowcasePage() {
         <div className="mx-auto max-w-6xl space-y-10 px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <Badge
-                variant="secondary"
-                className="bg-emerald-500/15 text-emerald-200"
-              >
-                {sarpTr("Döngü", "THE LOOP")}
-              </Badge>
+
               <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
                 {sarpTr("Döngüsel Çözüm", "The Loop")}
               </h2>
@@ -394,12 +394,7 @@ export default function ShowcasePage() {
       <section className="bg-slate-900 py-16 sm:py-24">
         <div className="mx-auto max-w-6xl space-y-12 px-6">
           <div className="flex flex-col gap-3 text-center">
-            <Badge
-              variant="secondary"
-              className="mx-auto bg-white/10 text-white"
-            >
-              {sarpTr("UYGULAMA VİTRİNİ", "APP SHOWCASE")}
-            </Badge>
+
             <h2 className="text-3xl font-semibold sm:text-4xl">
               {sarpTr(
                 "Hareketsizliği harekete çevir.",
@@ -471,12 +466,7 @@ export default function ShowcasePage() {
       <section className="bg-slate-50 py-16 text-slate-900 sm:py-24">
         <div className="mx-auto max-w-6xl space-y-12 px-6">
           <div className="text-center">
-            <Badge
-              variant="secondary"
-              className="mx-auto bg-emerald-100 text-emerald-700"
-            >
-              {sarpTr("BİLİM", "THE SCIENCE")}
-            </Badge>
+
             <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
               {sarpTr(
                 "Doğanın Gücü, Mühendisliğin Hassasiyeti.",
@@ -495,7 +485,7 @@ export default function ShowcasePage() {
             <Card className="bg-white">
               <div className="relative aspect-[4/3] w-full">
                 <Image
-                  src="/images/i-112.png"
+                  src="/images/green-thing.png"
                   alt="enzyme 3d"
                   fill
                   className="object-contain"
@@ -552,12 +542,7 @@ export default function ShowcasePage() {
       <section className="bg-slate-900 py-16 sm:py-24">
         <div className="mx-auto max-w-6xl space-y-10 px-6">
           <div className="flex flex-col gap-3 text-center">
-            <Badge
-              variant="secondary"
-              className="mx-auto bg-white/10 text-white"
-            >
-              {sarpTr("ETKİ VE YOL HARİTASI", "IMPACT & ROADMAP")}
-            </Badge>
+
             <h2 className="text-3xl font-semibold sm:text-4xl">
               {sarpTr("Etkimiz ve Yol Haritası", "Impact & Roadmap")}
             </h2>
@@ -615,12 +600,7 @@ export default function ShowcasePage() {
       <section className="bg-slate-950 py-16 sm:py-24">
         <div className="mx-auto max-w-6xl space-y-10 px-6">
           <div className="flex flex-col gap-3 text-center">
-            <Badge
-              variant="secondary"
-              className="mx-auto bg-white/10 text-white"
-            >
-              {sarpTr("EKİP VE PARTNERLER", "TEAM & PARTNERS")}
-            </Badge>
+
             <h2 className="text-3xl font-semibold sm:text-4xl">
               {sarpTr("Beraber Büyüyoruz", "Team & Partners")}
             </h2>
@@ -632,34 +612,33 @@ export default function ShowcasePage() {
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2">
+          <div className="space-y-10">
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold">
-                {sarpTr("Ekip", "Team")}
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-2">
+
+              <div className="flex justify-center gap-4 py-3 overflow-visible overscroll-y-none pb-2">
                 {team.map((member) => (
-                  <Card
-                    key={member.name}
-                    className="border border-white/10 bg-white/5"
-                  >
-                    <CardContent className="flex items-center gap-4 p-4">
-                      <div className="relative h-14 w-14 overflow-hidden rounded-full bg-emerald-500/20">
+                  <CometCard key={member.name}>
+                    <div
+                      className="my-4 flex w-72 flex-col rounded-[16px] border border-white/10 bg-[#1F2121] p-3 text-white"
+                      style={{ transformStyle: "preserve-3d" }}
+                    >
+                      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[12px] bg-black/40">
                         <Image
                           src={member.image}
                           alt={member.name}
                           fill
-                          className="object-cover"
+                          sizes="(min-width: 1024px) 18rem, 14rem"
+                          className="absolute inset-0 h-full w-full object-cover contrast-90"
                         />
                       </div>
-                      <div>
-                        <p className="font-semibold">{member.name}</p>
-                        <p className="text-sm text-slate-200/80">
-                          {member.role}
-                        </p>
+                      <div className="mt-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-wide text-emerald-100">
+                        <span>{member.name}</span>
+                        <span className="text-gray-300 opacity-70">
+                          {sarpTr(member.role.tr, member.role.en)}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </CometCard>
                 ))}
               </div>
             </div>
