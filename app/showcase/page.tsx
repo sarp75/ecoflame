@@ -3,8 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { Suspense, useEffect, useState } from "react";
-
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +14,8 @@ import {
 import Loading from "@/app/loading";
 import { initLangCookie, Lang, setLangCookie } from "@/lib/lang";
 import { CometCard } from "@/components/ui/comet-card";
+import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
+import { NumberTicker } from "@/components/ui/number-ticker";
 
 type Copy = { tr: string; en: string };
 
@@ -63,7 +63,7 @@ const roadmap = [
 
 const team = [
   {
-    name: "Can Doe",
+    name: "Can",
     role: { tr: "Lider Bilimci", en: "Lead Scientist" },
     image: "/images/dragons/head2.png",
   },
@@ -73,13 +73,11 @@ const team = [
     image: "/images/i-32.png",
   },
   {
-    name: "Nisa Doe",
+    name: "Nisa",
     role: { tr: "Lider Sanatçı", en: "Lead Artist" },
     image: "/images/i-14.png",
   },
 ];
-
-
 
 type StatKey = "pilots" | "accuracy" | "breakdown";
 
@@ -112,43 +110,18 @@ const stats: Stat[] = [
 ];
 
 export default function ShowcasePage() {
-
-  const [counts, setCounts] = React.useState<Record<StatKey, number>>({
-    pilots: 0,
-    accuracy: 0,
-    breakdown: 0,
-  });
   const [lang, setLang] = useState<Lang>("en");
   const partners = [
-    { name: (sarpTr("İzmir Atatürk Lisesi", "Izmir Atatürk Highschool") ), image: "/images/i-22.png" },
-    { name: (sarpTr("İZSU", "IZSU")), image: "/images/i-23.png" },
-    { name: (sarpTr("Partnerliğe açığız", "Open for partnership")), image: "/images/i-3.png" },
+    {
+      name: sarpTr("İzmir Atatürk Lisesi", "Izmir Atatürk Highschool"),
+      image: "/images/i-22.png",
+    },
+    { name: sarpTr("İZSU", "IZSU"), image: "/images/i-23.png" },
+    {
+      name: sarpTr("Partnerliğe açığız", "Open for partnership"),
+      image: "/images/i-3.png",
+    },
   ];
-
-  React.useEffect(() => {
-    const targets: Record<StatKey, number> = {
-      pilots: 20,
-      accuracy: 92,
-      breakdown: 90,
-    };
-
-    const start = performance.now();
-    let raf = 0;
-
-    const tick = (now: number) => {
-      const progress = Math.min((now - start) / 1400, 1);
-      setCounts({
-        pilots: Math.round(targets.pilots * progress),
-        accuracy: Math.round(targets.accuracy * progress),
-        breakdown: Math.round(targets.breakdown * progress),
-      });
-      if (progress < 1) raf = requestAnimationFrame(tick);
-    };
-
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
   useEffect(() => {
     const current = initLangCookie();
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -163,69 +136,61 @@ export default function ShowcasePage() {
   return (
     <div className="bg-slate-950 text-white">
       <section className="relative isolate min-h-screen overflow-hidden">
-        <div
-          className="absolute top-15 right-15 text-3xl z-50 select-none hover:scale-110 transition cursor-pointer"
+        <BackgroundRippleEffect cellSize={64} fixed={false} />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/30 to-slate-950" />
+        <button
           onClick={() => changeLang(lang === "tr" ? "en" : "tr")}
+          className="fixed top-6 right-6 w-12 h-12 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-2xl shadow-lg shadow-black/30 transition-all duration-200 hover:scale-110 hover:bg-zinc-700 active:scale-95 select-none z-50"
         >
-          {lang === "tr" ? "????" : "????"}
-        </div>
-        <div className="absolute inset-0 grid grid-cols-1 lg:grid-cols-2 opacity-80">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-slate-950 to-sky-900" />
-            <div className="absolute inset-0 [background-image:linear-gradient(rgba(16,185,129,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(14,165,233,0.14)_1px,transparent_1px)] [background-size:18px_18px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent" />
-            <div className="relative mx-auto flex h-full max-w-3xl items-center justify-center">
-              <div className="overflow-visible -rotate-90 h-48 w-48">
-                <div className="absolute -left-24 -top-24 h-96 w-96">
-                  <Suspense fallback={<Loading />}>
-                    <Image
-                      src={"/images/dragons/" + 1 + ".png"}
-                      alt="visual"
-                      fill
-                      className="absolute inset-0 z-30"
-                    />
-                    <Image
-                      src={"/images/dragons/" + 1 + ".png"}
-                      alt="visual"
-                      fill
-                      className="absolute inset-0 z-10"
-                    />
-                    <Image
-                      src={"/images/dragons/" + 1 + ".png"}
-                      alt="visual"
-                      fill
-                      className="absolute inset-0 z-20"
-                    />
-                    <Image
-                      src={"/images/dragons/" + 1 + ".png"}
-                      alt="visual"
-                      fill
-                      className="absolute inset-0 z-20"
-                    />
-                  </Suspense>
-                </div>
+          {lang === "tr" ? "🇹🇷" : "🇬🇧"}
+        </button>
+
+        <div className="absolute inset-0 grid grid-cols-1 lg:grid-cols-2 opacity-90 pointer-events-none">
+          <div className="relative flex items-center justify-center">
+            <div className="relative h-48 w-48 -rotate-90">
+              <div className="absolute -left-24 -top-24 h-96 w-96">
+                <Suspense fallback={<Loading />}>
+                  <Image
+                    src={"/images/dragons/" + 1 + ".png"}
+                    alt="visual"
+                    fill
+                    className="absolute inset-0 z-30"
+                  />
+                  <Image
+                    src={"/images/dragons/" + 1 + ".png"}
+                    alt="visual"
+                    fill
+                    className="absolute inset-0 z-10"
+                  />
+                  <Image
+                    src={"/images/dragons/" + 1 + ".png"}
+                    alt="visual"
+                    fill
+                    className="absolute inset-0 z-20"
+                  />
+                  <Image
+                    src={"/images/dragons/" + 1 + ".png"}
+                    alt="visual"
+                    fill
+                    className="absolute inset-0 z-20"
+                  />
+                </Suspense>
               </div>
             </div>
           </div>
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-sky-900 via-slate-950 to-emerald-900" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(52,211,153,0.3),transparent_35%)] blur-3xl" />
-            <div className="absolute inset-0 [background-image:linear-gradient(rgba(56,189,248,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.2)_1px,transparent_1px)] [background-size:22px_22px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent" />
-            <div className="relative mx-auto flex h-full max-w-3xl items-center justify-center">
-              <Image
-                src="/images/green-thing.png"
-                alt="enzyme art"
-                width={420}
-                height={420}
-                className="mix-blend-screen drop-shadow-[0_25px_55px_rgba(56,189,248,0.4)]"
-                priority
-              />
-            </div>
+          <div className="relative flex items-center justify-center">
+            <Image
+              src="/images/green-thing.png"
+              alt="enzyme art"
+              width={420}
+              height={420}
+              className="mix-blend-screen drop-shadow-[0_25px_55px_rgba(56,189,248,0.4)]"
+              priority
+            />
           </div>
         </div>
 
-        <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-8 px-6 py-20 text-center">
+        <div className="relative pointer-events-none mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-8 px-6 py-20 text-center">
           <div className="space-y-4">
             <p className="text-sm uppercase tracking-[0.3em] text-emerald-200/80">
               ECOFLAME
@@ -246,10 +211,10 @@ export default function ShowcasePage() {
             <Button
               asChild
               size="lg"
-              className="bg-emerald-500 hover:bg-emerald-400"
+              className="bg-emerald-500 pointer-events-auto hover:bg-emerald-400 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(16,185,129,0.35)]"
             >
               <Link
-                href="https://youtu.be/dQw4w9WgXcQ"
+                href="https://youtu.be/5YQTDYE_5f4"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -260,7 +225,7 @@ export default function ShowcasePage() {
               asChild
               size="lg"
               variant="secondary"
-              className="bg-white/10 text-white hover:bg-white/20"
+              className="bg-white/10 text-white pointer-events-auto hover:bg-white/20 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(255,255,255,0.18)]"
             >
               <Link href="/savas">
                 {sarpTr("Oyunu Oyna 📱", "Play the Game 📱")}
@@ -274,7 +239,6 @@ export default function ShowcasePage() {
         <div className="mx-auto max-w-6xl space-y-10 px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-
               <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
                 {sarpTr("Döngüsel Çözüm", "The Loop")}
               </h2>
@@ -291,7 +255,7 @@ export default function ShowcasePage() {
           </div>
 
           <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_auto_1.1fr]">
-            <Card className="border border-emerald-500/30 bg-emerald-500/5">
+            <Card className="border border-emerald-500/30 bg-emerald-500/5 transition duration-200 hover:-translate-y-1 hover:border-emerald-400/60 hover:shadow-[0_18px_40px_rgba(16,185,129,0.2)]">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-emerald-200">
                   {sarpTr("Faz 1: Toplama", "Phase 1: Collection")}
@@ -337,13 +301,13 @@ export default function ShowcasePage() {
             </Card>
 
             <div className="relative flex h-full w-full items-center justify-center">
-              <div className="relative flex h-48 w-48 items-center justify-center rounded-full border-4 border-emerald-400/80 bg-emerald-500/10 shadow-[0_0_60px_rgba(52,211,153,0.35)] animate-[spin_14s_linear_infinite]" />
+              <div className="relative flex h-48 w-48 items-center justify-center rounded-full border-4 border-emerald-400/80 bg-emerald-500/10 shadow-[0_0_60px_rgba(52,211,153,0.35)] animate-[spin_14s_linear_infinite] hover:animate-[spin_9s_linear_infinite]" />
               <div className="absolute h-40 w-40 rounded-full bg-slate-950/70 backdrop-blur flex items-center justify-center text-emerald-200 font-semibold">
                 {sarpTr("Döngü", "THE LOOP")}
               </div>
             </div>
 
-            <Card className="border border-sky-400/30 bg-sky-500/5">
+            <Card className="border border-sky-400/30 bg-sky-500/5 transition duration-200 hover:-translate-y-1 hover:border-sky-300/60 hover:shadow-[0_18px_40px_rgba(56,189,248,0.18)]">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-sky-200">
                   {sarpTr("Faz 2: İmha", "Phase 2: Destruction")}
@@ -394,7 +358,6 @@ export default function ShowcasePage() {
       <section className="bg-slate-900 py-16 sm:py-24">
         <div className="mx-auto max-w-6xl space-y-12 px-6">
           <div className="flex flex-col gap-3 text-center">
-
             <h2 className="text-3xl font-semibold sm:text-4xl">
               {sarpTr(
                 "Hareketsizliği harekete çevir.",
@@ -410,7 +373,7 @@ export default function ShowcasePage() {
           </div>
 
           <div className="grid gap-10 lg:grid-cols-2">
-            <Card className="overflow-hidden border-emerald-500/20 bg-slate-950">
+            <Card className="overflow-hidden border-emerald-500/20 bg-slate-950 transition duration-200 hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-[0_16px_36px_rgba(16,185,129,0.2)]">
               <div className="relative aspect-[4/5] w-full">
                 <Image
                   src="/images/i-42.png"
@@ -426,7 +389,7 @@ export default function ShowcasePage() {
                 {features.map((item) => (
                   <Card
                     key={item.title.en}
-                    className="border border-white/5 bg-white/5"
+                    className="border border-white/5 bg-white/5 transition duration-200 hover:-translate-y-1 hover:border-white/15 hover:bg-white/10"
                   >
                     <CardContent className="flex items-center gap-4 p-4">
                       <div className="text-2xl">{item.icon}</div>
@@ -466,7 +429,6 @@ export default function ShowcasePage() {
       <section className="bg-slate-50 py-16 text-slate-900 sm:py-24">
         <div className="mx-auto max-w-6xl space-y-12 px-6">
           <div className="text-center">
-
             <h2 className="mt-3 text-3xl font-semibold sm:text-4xl">
               {sarpTr(
                 "Doğanın Gücü, Mühendisliğin Hassasiyeti.",
@@ -482,7 +444,7 @@ export default function ShowcasePage() {
           </div>
 
           <div className="grid gap-10 lg:grid-cols-2">
-            <Card className="bg-white">
+            <Card className="bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
               <div className="relative aspect-[4/3] w-full">
                 <Image
                   src="/images/green-thing.png"
@@ -520,7 +482,10 @@ export default function ShowcasePage() {
                 </li>
               </ul>
               <div className="flex flex-wrap gap-3">
-                <Button asChild className="bg-emerald-600 hover:bg-emerald-500">
+                <Button
+                  asChild
+                  className="bg-emerald-600 hover:bg-emerald-500 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(16,185,129,0.2)]"
+                >
                   <Link href="/science.pdf" target="_blank" rel="noreferrer">
                     {sarpTr(
                       "Bilimsel Raporu İncele (PDF)",
@@ -542,7 +507,6 @@ export default function ShowcasePage() {
       <section className="bg-slate-900 py-16 sm:py-24">
         <div className="mx-auto max-w-6xl space-y-10 px-6">
           <div className="flex flex-col gap-3 text-center">
-
             <h2 className="text-3xl font-semibold sm:text-4xl">
               {sarpTr("Etkimiz ve Yol Haritası", "Impact & Roadmap")}
             </h2>
@@ -559,10 +523,10 @@ export default function ShowcasePage() {
               {stats.map((stat) => (
                 <div
                   key={stat.key}
-                  className="flex flex-col items-center justify-center rounded-xl bg-slate-950/60 p-4 shadow-inner"
+                  className="flex flex-col items-center justify-center rounded-xl bg-slate-950/60 p-4 shadow-inner transition duration-200 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,0,0,0.32)]"
                 >
                   <p className="text-4xl font-bold text-emerald-300">
-                    {counts[stat.key]}
+                    <NumberTicker value={stat.target} />
                     {stat.suffix}
                   </p>
                   <p className="mt-2 text-sm uppercase tracking-wide text-slate-200/80">
@@ -572,7 +536,7 @@ export default function ShowcasePage() {
               ))}
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 transition duration-200 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,0,0,0.26)]">
               <h3 className="text-xl font-semibold">
                 {sarpTr("Yol Haritası", "Roadmap")}
               </h3>
@@ -600,7 +564,6 @@ export default function ShowcasePage() {
       <section className="bg-slate-950 py-16 sm:py-24">
         <div className="mx-auto max-w-6xl space-y-10 px-6">
           <div className="flex flex-col gap-3 text-center">
-
             <h2 className="text-3xl font-semibold sm:text-4xl">
               {sarpTr("Beraber Büyüyoruz", "Team & Partners")}
             </h2>
@@ -614,8 +577,7 @@ export default function ShowcasePage() {
 
           <div className="space-y-10">
             <div className="space-y-4">
-
-              <div className="flex justify-center gap-4 py-3 overflow-visible overscroll-y-none pb-2">
+              <div className="flex justify-center gap-4 overflow-x-auto p-4 overflow-visible overscroll-y-none">
                 {team.map((member) => (
                   <CometCard key={member.name}>
                     <div
@@ -651,7 +613,7 @@ export default function ShowcasePage() {
                 {partners.map((partner) => (
                   <Card
                     key={partner.name}
-                    className="border border-white/10 bg-white/5"
+                    className="border border-white/10 bg-white/5 transition duration-200 hover:-translate-y-1 hover:border-emerald-300/40 hover:shadow-[0_16px_32px_rgba(16,185,129,0.18)]"
                   >
                     <CardContent className="flex h-28 items-center justify-center p-4">
                       <div className="flex flex-col items-center gap-2 text-center">
@@ -671,7 +633,10 @@ export default function ShowcasePage() {
                   </Card>
                 ))}
               </div>
-              <Button asChild className="bg-emerald-600 hover:bg-emerald-500">
+              <Button
+                asChild
+                className="bg-emerald-600 hover:bg-emerald-500 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(16,185,129,0.2)]"
+              >
                 <Link href="/contact">
                   {sarpTr("Bizimle Ortak Ol", "Partner with Us")}
                 </Link>
