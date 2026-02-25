@@ -16,6 +16,10 @@ import { initLangCookie, Lang, setLangCookie } from "@/lib/lang";
 import { CometCard } from "@/components/ui/comet-card";
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { PartnersSection } from "@/components/ui/partners";
+import { useSearchParams } from "next/navigation";
+
+let georgeMode = false;
 
 type Copy = { tr: string; en: string };
 
@@ -61,24 +65,6 @@ const roadmap = [
   },
 ];
 
-const team = [
-  {
-    name: "Can",
-    role: { tr: "Lider Bilimci", en: "Lead Scientist" },
-    image: "/images/dragons/head2.png",
-  },
-  {
-    name: "Sarp Pamuk",
-    role: { tr: "Lider Geliştirici", en: "Lead Developer" },
-    image: "/images/i-32.png",
-  },
-  {
-    name: "Nisa",
-    role: { tr: "Lider Sanatçı", en: "Lead Artist" },
-    image: "/images/i-14.png",
-  },
-];
-
 type StatKey = "pilots" | "accuracy" | "breakdown";
 
 type Stat = {
@@ -111,15 +97,23 @@ const stats: Stat[] = [
 
 export default function ShowcasePage() {
   const [lang, setLang] = useState<Lang>("en");
-  const partners = [
+  const params = useSearchParams();
+  georgeMode = params.get("george") === "true";
+  const team = [
     {
-      name: sarpTr("İzmir Atatürk Lisesi", "Izmir Atatürk Highschool"),
-      image: "/images/i-22.png",
+      name: "Can Hoşkal",
+      role: { tr: "Lider Bilimci", en: "Lead Scientist" },
+      image: georgeMode ? "/images/george.jpg" : "/images/can.jpg",
     },
-    { name: sarpTr("İZSU", "IZSU"), image: "/images/i-23.png" },
     {
-      name: sarpTr("Partnerliğe açığız", "Open for partnership"),
-      image: "/images/i-3.png",
+      name: "Sarp Pamuk",
+      role: { tr: "Lider Geliştirici", en: "Lead Developer" },
+      image: georgeMode ? "/images/george.jpg" : "/images/sarp.jpg",
+    },
+    {
+      name: "Nisa Nur Güneş",
+      role: { tr: "Lider Sanatçı", en: "Lead Artist" },
+      image: georgeMode ? "/images/george.jpg" : "/images/nisa.jpg",
     },
   ];
   useEffect(() => {
@@ -193,7 +187,7 @@ export default function ShowcasePage() {
         <div className="relative pointer-events-none mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-8 px-6 py-20 text-center">
           <div className="space-y-4">
             <p className="text-sm uppercase tracking-[0.3em] text-emerald-200/80">
-              ECOFLAME
+              ECHO-FLAME
             </p>
             <h1 className="text-4xl font-bold leading-tight sm:text-6xl">
               {sarpTr("Oyunla Topluyoruz.", "Gamified Collection.")}
@@ -277,7 +271,9 @@ export default function ShowcasePage() {
                     className="rounded-lg"
                   />
                   <div>
-                    <p className="text-base font-semibold">Eco-Guardians</p>
+                    <p className="text-base font-semibold">
+                      {sarpTr("Eco-Guardians", "Eco-Guardians")}
+                    </p>
                     <p className="text-sm text-slate-300/80">
                       {sarpTr(
                         "Oyun içi kanıt, gerçek dünya atıkları.",
@@ -329,7 +325,9 @@ export default function ShowcasePage() {
                     className="rounded-lg"
                   />
                   <div>
-                    <p className="text-base font-semibold">Bio-Reactör</p>
+                    <p className="text-base font-semibold">
+                      {sarpTr("Bio-Reactör", "Bio-Reactor")}
+                    </p>
                     <p className="text-sm text-slate-300/80">
                       {sarpTr(
                         "Termofilik enzim tankı, düşük enerji profili.",
@@ -373,18 +371,20 @@ export default function ShowcasePage() {
           </div>
 
           <div className="grid gap-10 lg:grid-cols-2">
-            <Card className="overflow-hidden border-emerald-500/20 bg-slate-950 transition duration-200 hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-[0_16px_36px_rgba(16,185,129,0.2)]">
-              <div className="relative aspect-[4/5] w-full">
+            <Card className="overflow-visible border-emerald-500/20 bg-slate-950 transition duration-200 hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-[0_16px_36px_rgba(16,185,129,0.2)]">
+              <CardContent className="relative aspect-[3/4] h-full w-full">
                 <Image
-                  src="/images/i-42.png"
+                  src="/images/ss.png"
                   alt="app screen"
                   fill
-                  className="object-cover"
+                  className="h-full w-full object-cover"
                 />
-              </div>
+              </CardContent>
             </Card>
             <div className="grid content-center gap-6">
-              <h3 className="text-2xl font-semibold">Eco-Guardians</h3>
+              <h3 className="text-2xl font-semibold">
+                {sarpTr("Eco-Guardians", "Eco-Guardians")}
+              </h3>
               <div className="grid gap-4">
                 {features.map((item) => (
                   <Card
@@ -407,17 +407,8 @@ export default function ShowcasePage() {
               </div>
               <div className="flex flex-wrap gap-3">
                 <Button asChild>
-                  <Link href="/install">
-                    {sarpTr("Uygulamayı İndir", "Install App")}
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="secondary"
-                  className="bg-white/10 text-white hover:bg-white/20"
-                >
-                  <Link href="/auth/sign-up">
-                    {sarpTr("Erken Erişim", "Early Access")}
+                  <Link href="/">
+                    {sarpTr("Uygulamayı İndir", "Early Access")}
                   </Link>
                 </Button>
               </div>
@@ -447,7 +438,7 @@ export default function ShowcasePage() {
             <Card className="bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
               <div className="relative aspect-[4/3] w-full">
                 <Image
-                  src="/images/green-thing.png"
+                  src="/images/somethingreallyscientific.png"
                   alt="enzyme 3d"
                   fill
                   className="object-contain"
@@ -494,7 +485,7 @@ export default function ShowcasePage() {
                   </Link>
                 </Button>
                 <Button asChild variant="secondary">
-                  <Link href="/contact">
+                  <Link href="mailto:canhoskal@gmail.com">
                     {sarpTr("Demo Talep Et", "Request a Demo")}
                   </Link>
                 </Button>
@@ -609,38 +600,7 @@ export default function ShowcasePage() {
               <h3 className="text-xl font-semibold">
                 {sarpTr("Partnerler", "Partners")}
               </h3>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {partners.map((partner) => (
-                  <Card
-                    key={partner.name}
-                    className="border border-white/10 bg-white/5 transition duration-200 hover:-translate-y-1 hover:border-emerald-300/40 hover:shadow-[0_16px_32px_rgba(16,185,129,0.18)]"
-                  >
-                    <CardContent className="flex h-28 items-center justify-center p-4">
-                      <div className="flex flex-col items-center gap-2 text-center">
-                        <div className="relative h-14 w-14 overflow-hidden rounded-full bg-slate-800">
-                          <Image
-                            src={partner.image}
-                            alt={partner.name}
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                        <p className="text-xs text-slate-200/80">
-                          {partner.name}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <Button
-                asChild
-                className="bg-emerald-600 hover:bg-emerald-500 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(16,185,129,0.2)]"
-              >
-                <Link href="/contact">
-                  {sarpTr("Bizimle Ortak Ol", "Partner with Us")}
-                </Link>
-              </Button>
+              <PartnersSection lang={lang} />
             </div>
           </div>
         </div>
@@ -648,7 +608,6 @@ export default function ShowcasePage() {
     </div>
   );
   function sarpTr(tr: string, en: string): string {
-    // translation stub shiiiii
     if (lang === "tr") return tr;
     return en;
   }

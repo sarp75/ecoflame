@@ -16,11 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        <title>Ecoflame</title>
+        <title>Echo-flame</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta
           name="description"
-          content="Ecoflame is a gamified environmental app that rewards users for eco-friendly actions."
+          content="Echo-flame is a gamified environmental app that rewards users for eco-friendly actions."
         />
         <link rel="icon" href="/images/i-1.png" />
         <link rel="manifest" href="/site.webmanifest" />

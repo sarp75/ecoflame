@@ -101,11 +101,12 @@ export const CometCard = ({
         className="relative rounded-2xl"
       >
         {children}
+        <div className="pointer-events-none absolute inset-0 z-40 h-full w-full rounded-[16px] bg-black/25 mix-blend-multiply" />
         <motion.div
           className="pointer-events-none absolute inset-0 z-50 h-full w-full rounded-[16px] mix-blend-overlay"
           style={{
             background: glareBackground,
-            opacity: 0.6,
+            opacity: 0.45,
           }}
           transition={{ duration: 0.2 }}
         />

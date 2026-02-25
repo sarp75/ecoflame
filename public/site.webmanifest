@@ -1,6 +1,6 @@
 {
-  "name": "Ecoflame",
-  "short_name": "Ecoflame",
+  "name": "Echo-flame",
+  "short_name": "Echo-flame",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -15,7 +15,7 @@
   ],
   "start_url": ".",
   "theme_color": "green",
-  "description": "Ecoflame is an app that promotes environmental awareness through fun and engaging gameplay.",
+  "description": "Echo-flame is an app that promotes environmental awareness through fun and engaging gameplay.",
   "background_color": "green",
   "display": "standalone"
 }
