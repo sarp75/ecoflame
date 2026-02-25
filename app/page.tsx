@@ -37,6 +37,12 @@ import { type DecisionResult, evaluateDecision } from "@/lib/player-decision";
                        | |             __/ |
                        |_|            |___/
 
+
+
+
+   gave you the whole book on how to get rich and you ain't even read it
+   - ken carson
+
 */
 
 export interface UserProfile {
