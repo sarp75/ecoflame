@@ -22,6 +22,7 @@ import { xpToLevel } from "@/lib/progression";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type DecisionResult, evaluateDecision } from "@/lib/player-decision";
+import { useLang } from "@/components/lang-provider";
 
 //import { textToColor } from "@/lib/profile";
 
@@ -66,6 +67,8 @@ export interface Task {
   active: boolean;
 }
 export default function Page() {
+  const { t } = useLang();
+  const sarpTr = (tr: string, en: string) => t({ tr, en });
   const [me, setMe] = useState<UserProfile | null>(null);
   const [myClass, setMyClass] = useState<UserProfile[] | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -84,7 +87,7 @@ export default function Page() {
         window.location.href = "/auth/sign-up-success";
         return;
       }
-      if (!res.ok) toast.error("Bir hata oluştu");
+      if (!res.ok) toast.error(sarpTr("Bir hata oluştu", "Something went wrong"));
 
       const json = await res.json();
       setMe(json.data);
@@ -94,25 +97,25 @@ export default function Page() {
   }, []);
 
   const fetchClass = async () => {
-    if (!me) throw new Error("User not loaded yet");
+    if (!me) throw new Error(sarpTr("Kullanıcı henüz hazır değil", "User not loaded yet"));
     const res = await fetch("/api/class", {
       method: "POST",
       //next: { revalidate: 60 },
       body: JSON.stringify({ wantedClass: me.class }),
     });
-    if (!res.ok) throw new Error("Failed to fetch class data");
+    if (!res.ok) throw new Error(sarpTr("Sınıf verisi alınamadı", "Failed to fetch class data"));
 
     const json = await res.json();
     setMyClass(json.data);
   };
 
   const fetchTasks = async () => {
-    if (!me) throw new Error("User not loaded yet");
+    if (!me) throw new Error(sarpTr("Kullanıcı henüz hazır değil", "User not loaded yet"));
     const res = await fetch("/api/task", {
       method: "GET",
       cache: "force-cache",
     });
-    if (!res.ok) throw new Error("Failed to fetch class data");
+    if (!res.ok) throw new Error(sarpTr("Sınıf verisi alınamadı", "Failed to fetch class data"));
 
     const json = await res.json();
     setTasks(json);
@@ -128,19 +131,19 @@ export default function Page() {
   const fetchGlobalLeaders = async () => {
     setGlobalLeaders(null);
     const res = await fetch("/api/leaderboard", { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch leaderboard");
+    if (!res.ok) throw new Error(sarpTr("Liderlik listesi alınamadı", "Failed to fetch leaderboard"));
     const json = await res.json();
     setGlobalLeaders(json.data ?? json);
   };
   const fetchClassLeaders = async () => {
-    if (!me) throw new Error("User not loaded yet");
+    if (!me) throw new Error(sarpTr("Kullanıcı henüz hazır değil", "User not loaded yet"));
     setClassLeaders(null);
     const res = await fetch("/api/classboard", {
       method: "POST",
       cache: "no-store",
       body: JSON.stringify({ wantedClass: me.class }),
     });
-    if (!res.ok) throw new Error("Failed to fetch classboard");
+    if (!res.ok) throw new Error(sarpTr("Sınıf sıralaması alınamadı", "Failed to fetch classboard"));
     const json = await res.json();
     setClassLeaders(json.data ?? json);
   };
@@ -222,7 +225,7 @@ export default function Page() {
         className="flex h-16 w-full justify-center items-stretch mb-3 text-center"
       >
         <Button className="h-full flex-1" asChild>
-          <Link href="/savas">Savaş</Link>
+          <Link href="/savas">{sarpTr("Savaş", "Battle")}</Link>
         </Button>
         <Drawer>
           <DrawerTrigger asChild>
@@ -231,13 +234,13 @@ export default function Page() {
               onClick={() => fetchClass()}
               className="h-full flex-1"
             >
-              Klan
+              {sarpTr("Klan", "Clan")}
             </Button>
           </DrawerTrigger>
           <DrawerContent>
             <div className="mx-auto w-full max-w-sm">
               <DrawerHeader>
-                <DrawerTitle className="text-xl">Klanın</DrawerTitle>
+                <DrawerTitle className="text-xl">{sarpTr("Klanın", "Your clan")}</DrawerTitle>
               </DrawerHeader>
 
               <ScrollArea className=" w-full h-92 mb-8  rounded-md border">
@@ -355,13 +358,13 @@ export default function Page() {
               className="h-full flex-1"
               onClick={() => fetchTasks()}
             >
-              Görev
+              {sarpTr("Görev", "Tasks")}
             </Button>
           </DrawerTrigger>
           <DrawerContent>
             <div className="mx-auto w-full max-w-md">
               <DrawerHeader>
-                <DrawerTitle className="text-xl">Görevler</DrawerTitle>
+                <DrawerTitle className="text-xl">{sarpTr("Görevler", "Tasks")}</DrawerTitle>
               </DrawerHeader>
               <div className="grid gap-4 px-4 pb-6">
                 <ScrollArea className="h-64 rounded-md border">
@@ -386,13 +389,13 @@ export default function Page() {
                             <Badge variant="secondary">+{task.xp} XP</Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {task.desc || "Kanıt fotoğrafı yükle."}
+                            {task.desc || sarpTr("Kanıt fotoğrafı yükle.", "Upload a proof photo.")}
                           </p>
                         </button>
                       ))
                     ) : (
                       <p className="text-sm text-muted-foreground">
-                        Bu kategoriye ait görev yok.
+                        {sarpTr("Bu kategoriye ait görev yok.", "No tasks in this category.")}
                       </p>
                     )}
                   </div>
@@ -402,14 +405,14 @@ export default function Page() {
                     <>
                       <div>
                         <p className="text-xs uppercase text-muted-foreground">
-                          Seçilen görev
+                          {sarpTr("Seçilen görev", "Selected task")}
                         </p>
                         <p className="text-lg font-semibold dark:text-white">
                           {selectedTask.name}
                         </p>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {selectedTask.desc || "Kanıtını yükleyerek tamamla."}
+                        {selectedTask.desc || sarpTr("Kanıtını yükleyerek tamamla.", "Complete it by uploading proof.")}
                       </p>
                       {/*decision ? (
                         <div className="rounded-md border p-3 space-y-1 text-xs">
@@ -434,14 +437,14 @@ export default function Page() {
                         <Badge variant="outline">+{selectedTask.xp} XP</Badge>
                         <Button asChild className="flex-1">
                           <Link href={`/upload?task_id=${selectedTask.id}`}>
-                            Kanıt yükle
+                            {sarpTr("Kanıt yükle", "Upload proof")}
                           </Link>
                         </Button>
                       </div>
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Bir görevi seç ve detayları gör.
+                      {sarpTr("Bir görevi seç ve detayları gör.", "Pick a task to see details.")}
                     </p>
                   )}
                 </div>
@@ -458,141 +461,139 @@ export default function Page() {
                 fetchClassLeaders();
               }}
             >
-              Sıralama
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent>
-            <Tabs className="w-full max-w-md px-8" defaultValue="global">
-              <TabsList className="w-full justify-evenly  mt-4">
-                <TabsTrigger value="global">Global</TabsTrigger>
-                <TabsTrigger value="class">Sınıf</TabsTrigger>
-              </TabsList>
-              <TabsContent value="global">
-                <div className="mx-auto w-full max-w-sm">
-                  <ScrollArea className="w-full h-92 mb-8 rounded-md border">
-                    <div className="p-4 space-y-2">
-                      {globalLeaders ? (
-                        globalLeaders.map((user, index) => (
-                          <React.Fragment key={user.user_id}>
-                            {index > 0 && <Separator className="my-2" />}
-                            <div
-                              className={cn(
-                                "flex items-center gap-3",
-                                user.user_id === me.user_id
-                                  ? "font-semibold"
-                                  : "",
-                              )}
-                            >
-                              <Badge variant="secondary">{index + 1}</Badge>
-                              <Avatar>
-                                <AvatarImage alt={user.name} />
-                                <AvatarFallback
-                                  style={{
-                                    backgroundColor: textToColor(user.name),
-                                  }}
-                                >
-                                  {user.name.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col flex-1">
-                                <span className="text-sm dark:text-white">
-                                  {user.name}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {user.class}
-                                </span>
-                              </div>
-                              <Badge
-                                variant="default"
-                                className="h-5 min-w-5 rounded-full px-1 text-center bg-blue-500"
-                              >
-                                {xpToLevel(user.total_xp)}
-                              </Badge>
-                              <Badge
-                                variant="default"
-                                className="h-6 min-w-6 rounded-full px-1 text-center bg-green-500"
-                              >
-                                {user.coins}
-                              </Badge>
-                            </div>
-                          </React.Fragment>
-                        ))
-                      ) : (
-                        <>
-                          <div className="flex items-center gap-3">
-                            <Skeleton className="h-6 w-6 rounded-full" />
-                            <Skeleton className="h-8 w-32" />
-                          </div>
-                          <Separator className="my-2" />
-                          <div className="flex items-center gap-3">
-                            <Skeleton className="h-6 w-6 rounded-full" />
-                            <Skeleton className="h-8 w-32" />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </TabsContent>
-              <TabsContent value="class">
-                <div className="mx-auto w-full max-w-sm">
-                  <ScrollArea className="w-full h-92 mb-8 rounded-md border">
-                    <div className="p-4 space-y-2">
-                      {classLeaders ? (
-                        classLeaders.map((entry, index) => (
-                          <React.Fragment key={entry.class}>
-                            {index > 0 && <Separator className="my-2" />}
-                            <div className="flex items-center gap-3">
-                              <Badge variant="secondary">{index + 1}</Badge>
-                              <Avatar>
-                                <AvatarImage alt={entry.class} />
-                                <AvatarFallback
-                                  style={{
-                                    backgroundColor: textToColor(entry.class),
-                                  }}
-                                >
-                                  {entry.class.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col flex-1">
-                                <span className="text-sm dark:text-white">
-                                  {entry.class}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  Toplam XP
-                                </span>
-                              </div>
-                              <Badge
-                                variant="default"
-                                className="h-5 min-w-5 rounded-full px-1 text-center bg-blue-500"
-                              >
-                                {entry.t_xp}
-                              </Badge>
-                            </div>
-                          </React.Fragment>
-                        ))
-                      ) : (
-                        <>
-                          <div className="flex items-center gap-3">
-                            <Skeleton className="h-6 w-6 rounded-full" />
-                            <Skeleton className="h-8 w-32" />
-                          </div>
-                          <Separator className="my-2" />
-                          <div className="flex items-center gap-3">
-                            <Skeleton className="h-6 w-6 rounded-full" />
-                            <Skeleton className="h-8 w-32" />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </DrawerContent>
-        </Drawer>
-      </div>
-    </div>
+              {sarpTr("Sıralama", "Leaderboard")}
+             </Button>
+           </DrawerTrigger>
+           <DrawerContent>
+             <Tabs className="w-full max-w-md px-8" defaultValue="global">
+               <TabsList className="w-full justify-evenly  mt-4">
+                 <TabsTrigger value="global">Global</TabsTrigger>
+                 <TabsTrigger value="class">{sarpTr("Sınıf", "Class")}</TabsTrigger>
+               </TabsList>
+               <TabsContent value="global">
+                 <div className="mx-auto w-full max-w-sm">
+                   <ScrollArea className="w-full h-92 mb-8 rounded-md border">
+                     <div className="p-4 space-y-2">
+                       {globalLeaders ? (
+                         globalLeaders.map((user, index) => (
+                           <React.Fragment key={user.user_id}>
+                             {index > 0 && <Separator className="my-2" />}
+                             <div
+                               className={cn(
+                                 "flex items-center gap-3",
+                                 user.user_id === me.user_id ? "font-semibold" : "",
+                               )}
+                             >
+                               <Badge variant="secondary">{index + 1}</Badge>
+                               <Avatar>
+                                 <AvatarImage alt={user.name} />
+                                 <AvatarFallback
+                                   style={{
+                                     backgroundColor: textToColor(user.name),
+                                   }}
+                                 >
+                                   {user.name.charAt(0).toUpperCase()}
+                                 </AvatarFallback>
+                               </Avatar>
+                               <div className="flex flex-col flex-1">
+                                 <span className="text-sm dark:text-white">
+                                   {user.name}
+                                 </span>
+                                 <span className="text-xs text-muted-foreground">
+                                   {user.class}
+                                 </span>
+                               </div>
+                               <Badge
+                                 variant="default"
+                                 className="h-5 min-w-5 rounded-full px-1 text-center bg-blue-500"
+                               >
+                                 {xpToLevel(user.total_xp)}
+                               </Badge>
+                               <Badge
+                                 variant="default"
+                                 className="h-6 min-w-6 rounded-full px-1 text-center bg-green-500"
+                               >
+                                 {user.coins}
+                               </Badge>
+                             </div>
+                           </React.Fragment>
+                         ))
+                       ) : (
+                         <>
+                           <div className="flex items-center gap-3">
+                             <Skeleton className="h-6 w-6 rounded-full" />
+                             <Skeleton className="h-8 w-32" />
+                           </div>
+                           <Separator className="my-2" />
+                           <div className="flex items-center gap-3">
+                             <Skeleton className="h-6 w-6 rounded-full" />
+                             <Skeleton className="h-8 w-32" />
+                           </div>
+                         </>
+                       )}
+                     </div>
+                   </ScrollArea>
+                 </div>
+               </TabsContent>
+               <TabsContent value="class">
+                 <div className="mx-auto w-full max-w-sm">
+                   <ScrollArea className="w-full h-92 mb-8 rounded-md border">
+                     <div className="p-4 space-y-2">
+                       {classLeaders ? (
+                         classLeaders.map((entry, index) => (
+                           <React.Fragment key={entry.class}>
+                             {index > 0 && <Separator className="my-2" />}
+                             <div className="flex items-center gap-3">
+                               <Badge variant="secondary">{index + 1}</Badge>
+                               <Avatar>
+                                 <AvatarImage alt={entry.class} />
+                                 <AvatarFallback
+                                   style={{
+                                     backgroundColor: textToColor(entry.class),
+                                   }}
+                                 >
+                                   {entry.class.slice(0, 2).toUpperCase()}
+                                 </AvatarFallback>
+                               </Avatar>
+                               <div className="flex flex-col flex-1">
+                                 <span className="text-sm dark:text-white">
+                                   {entry.class}
+                                 </span>
+                                 <span className="text-xs text-muted-foreground">
+                                   {sarpTr("Toplam XP", "Total XP")}
+                                 </span>
+                               </div>
+                               <Badge
+                                 variant="default"
+                                 className="h-5 min-w-5 rounded-full px-1 text-center bg-blue-500"
+                               >
+                                 {entry.t_xp}
+                               </Badge>
+                             </div>
+                           </React.Fragment>
+                         ))
+                       ) : (
+                         <>
+                           <div className="flex items-center gap-3">
+                             <Skeleton className="h-6 w-6 rounded-full" />
+                             <Skeleton className="h-8 w-32" />
+                           </div>
+                           <Separator className="my-2" />
+                           <div className="flex items-center gap-3">
+                             <Skeleton className="h-6 w-6 rounded-full" />
+                             <Skeleton className="h-8 w-32" />
+                           </div>
+                         </>
+                       )}
+                     </div>
+                   </ScrollArea>
+                 </div>
+               </TabsContent>
+             </Tabs>
+           </DrawerContent>
+         </Drawer>
+       </div>
+     </div>
   );
 }
 // shiiii i love saying shiiiii in my comments shiiiiiiiii
@@ -608,3 +609,4 @@ function textToColor(text: string) {
 // shiiiii keep old imports working
 export { textToColor } from "@/lib/profile";
 export { xpToLevel } from "@/lib/progression";
+

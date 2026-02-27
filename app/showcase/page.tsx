@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Loading from "@/app/loading";
-import { initLangCookie, Lang, setLangCookie } from "@/lib/lang";
+import { useLang } from "@/components/lang-provider";
 import { CometCard } from "@/components/ui/comet-card";
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { NumberTicker } from "@/components/ui/number-ticker";
@@ -96,7 +96,7 @@ const stats: Stat[] = [
 ];
 
 export default function ShowcasePage() {
-  const [lang, setLang] = useState<Lang>("en");
+  const { lang, t } = useLang();
   const params = useSearchParams();
   georgeMode = params.get("george") === "true";
   const team = [
@@ -116,28 +116,13 @@ export default function ShowcasePage() {
       image: georgeMode ? "/images/george.jpg" : "/images/nisa.jpg",
     },
   ];
-  useEffect(() => {
-    const current = initLangCookie();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(current);
-  }, []);
-
-  function changeLang(newLang: Lang) {
-    setLangCookie(newLang);
-    setLang(newLang);
-  }
+  const sarpTr = (tr: string, en: string) => t({ tr, en });
 
   return (
     <div className="bg-slate-950 text-white">
       <section className="relative isolate min-h-screen overflow-hidden">
         <BackgroundRippleEffect cellSize={64} fixed={false} />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/30 to-slate-950" />
-        <button
-          onClick={() => changeLang(lang === "tr" ? "en" : "tr")}
-          className="fixed top-6 right-6 w-12 h-12 flex items-center justify-center rounded-full bg-zinc-800/80 backdrop-blur-md text-2xl shadow-lg shadow-black/30 transition-all duration-200 hover:scale-110 hover:bg-zinc-700 active:scale-95 select-none z-50"
-        >
-          {lang === "tr" ? "🇹🇷" : "🇬🇧"}
-        </button>
 
         <div className="absolute inset-0 grid grid-cols-1 lg:grid-cols-2 opacity-90 pointer-events-none">
           <div className="relative flex items-center justify-center">
@@ -600,15 +585,11 @@ export default function ShowcasePage() {
               <h3 className="text-xl font-semibold">
                 {sarpTr("Partnerler", "Partners")}
               </h3>
-              <PartnersSection lang={lang} />
+              <PartnersSection />
             </div>
           </div>
         </div>
       </section>
     </div>
   );
-  function sarpTr(tr: string, en: string): string {
-    if (lang === "tr") return tr;
-    return en;
-  }
 }

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useLang } from "@/components/lang-provider";
 
 type Task = {
   id: string;
@@ -30,6 +31,8 @@ type UploadResult = {
 };
 
 export default function UploadPage() {
+  const { t } = useLang();
+  const sarpTr = (tr: string, en: string) => t({ tr, en });
   const params = useSearchParams();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -58,7 +61,7 @@ export default function UploadPage() {
         const json = await res.json();
         setTasks(json);
       } catch {
-        setMessage("Görev listesi yüklenemedi.");
+        setMessage(sarpTr("Görev listesi yüklenemedi.", "Task list could not load."));
       }
     };
     loadTasks();
@@ -69,7 +72,7 @@ export default function UploadPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!file) {
-      setMessage("Lütfen önce fotoğraf çek.");
+      setMessage(sarpTr("Lütfen önce fotoğraf çek.", "Please capture a photo first."));
       return;
     }
     setStatus("uploading");
@@ -88,10 +91,10 @@ export default function UploadPage() {
         body: formData,
       });
       const payload = await res.json();
-      if (!res.ok) throw new Error(payload?.error || "Yükleme başarısız.");
+      if (!res.ok) throw new Error(payload?.error || sarpTr("Yükleme başarısız.", "Upload failed."));
       setStatus("success");
       setUploadResult(payload as UploadResult);
-      setMessage("Yükleme tamamlandı.");
+      setMessage(sarpTr("Yükleme tamamlandı.", "Upload completed."));
       setFile(null);
       setCapturedUrl(null);
       if (videoRef.current) {
@@ -99,7 +102,7 @@ export default function UploadPage() {
       }
     } catch (err: any) {
       setStatus("error");
-      setMessage(err.message || "Yükleme başarısız.");
+      setMessage(err.message || sarpTr("Yükleme başarısız.", "Upload failed."));
       setUploadResult(null);
     }
   };
@@ -113,21 +116,21 @@ export default function UploadPage() {
     const width = video.videoWidth;
     const height = video.videoHeight;
     if (!width || !height) {
-      setMessage("Kamera hazır değil.");
+      setMessage(sarpTr("Kamera hazır değil.", "Camera not ready."));
       return;
     }
     canvas.width = width;
     canvas.height = height;
     const context = canvas.getContext("2d");
     if (!context) {
-      setMessage("Kayıt oluşturulamadı.");
+      setMessage(sarpTr("Kayıt oluşturulamadı.", "Could not create capture."));
       return;
     }
     context.drawImage(video, 0, 0, width, height);
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          setMessage("Fotoğraf kaydedilemedi.");
+          setMessage(sarpTr("Fotoğraf kaydedilemedi.", "Photo could not be saved."));
           return;
         }
         if (capturedUrl) {
@@ -162,7 +165,7 @@ export default function UploadPage() {
           typeof navigator === "undefined" ||
           !navigator.mediaDevices?.getUserMedia
         ) {
-          setCameraError("Cihaz kameraya erişimi desteklemiyor.");
+          setCameraError(sarpTr("Cihaz kameraya erişimi desteklemiyor.", "Device does not support camera access."));
           return;
         }
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -176,7 +179,7 @@ export default function UploadPage() {
         setCameraReady(true);
         setCameraError(null);
       } catch {
-        setCameraError("Kameraya erişilemedi, izinleri kontrol et.");
+        setCameraError(sarpTr("Kameraya erişilemedi, izinleri kontrol et.", "Could not access camera, check permissions."));
       }
     };
 
@@ -198,37 +201,36 @@ export default function UploadPage() {
   return (
     <main className="min-h-screen w-full flex flex-col space-y-6 bg-gradient-to-b from-[#041306] via-[#0c2412] to-[#163b25] px-4 py-6 text-emerald-50 sm:px-10 sm:py-10">
       <div className="flex items-center justify-between rounded-2xl border border-emerald-700/30 bg-emerald-900/20 px-4 py-3 shadow-lg shadow-black/50">
-        <Button
-          variant="ghost"
-          asChild
-          className="text-emerald-100 hover:bg-emerald-500/10"
-        >
-          <Link href="/">← Ana sayfa</Link>
-        </Button>
-        {selectedTask && (
-          <Badge
-            variant="secondary"
-            className="border border-lime-300/40 bg-lime-400/10 text-lime-50"
-          >
-            +{selectedTask.xp} XP
+        <div className="flex items-center gap-3">
+          <Button asChild variant="ghost" className="text-emerald-100">
+            <Link href="/">{sarpTr("← Ana Sayfa", "← Home")}</Link>
+          </Button>
+          <span className="text-sm text-emerald-100/80">{sarpTr("Kanıt Yükle", "Upload Proof")}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-emerald-100/80">
+          <Badge variant="secondary" className="border-emerald-500/40 bg-emerald-500/15 text-emerald-50">
+            {sarpTr("Kamera", "Camera")}
           </Badge>
-        )}
+          <Badge variant={cameraReady ? "default" : "outline"} className="border-emerald-500/40 bg-emerald-500/15 text-emerald-50">
+            {cameraReady ? sarpTr("Hazır", "Ready") : sarpTr("Bekleniyor", "Waiting")}
+          </Badge>
+        </div>
       </div>
       <section className="space-y-2">
-        <h1 className="text-2xl font-semibold dark:text-white">Kanıt yükle</h1>
+        <h1 className="text-2xl font-semibold dark:text-white">{sarpTr("Kanıt yükle", "Upload Proof")}</h1>
         <p className="text-sm text-muted-foreground">
-          Görevi seç, kanıtını ekle ve ödülünü al.
+          {sarpTr("Görevi seç, kanıtını ekle ve ödülünü al.", "Select a task, add your proof, and receive your reward.")}
         </p>
       </section>
       {selectedTask ? (
         <div className="rounded-3xl border border-emerald-600/40 bg-[#0c2414]/60 p-5 text-sm shadow-inner shadow-black/40">
           <p className="text-xs uppercase tracking-[0.4em] text-emerald-300/80">
-            aktif görev
+            {sarpTr("aktif görev", "active task")}
           </p>
           <div className="mt-2 flex flex-col gap-1">
             <span className="text-lg font-semibold">{selectedTask.name}</span>
             <span className="text-xs text-emerald-200/80">
-              {selectedTask.desc || "Kanıt fotoğrafı yükleyerek tamamla."}
+              {selectedTask.desc || sarpTr("Kanıt fotoğrafı yükleyerek tamamla.", "Complete by uploading proof photo.")}
             </span>
           </div>
           <div className="mt-4 flex items-center justify-between text-[10px] uppercase tracking-[0.35em] text-emerald-200/80">
@@ -239,15 +241,15 @@ export default function UploadPage() {
         </div>
       ) : (
         <div className="rounded-3xl border border-dashed border-emerald-600/40 bg-[#08180d]/80 p-5 text-sm text-emerald-200/70">
-          Bir hata oluştu, lütfen bir görev seçin.
+          {sarpTr("Bir hata oluştu, lütfen bir görev seçin.", "An error occurred, please select a task.")}
         </div>
       )}
 
       {uploadResult ? (
         <div className="space-y-3 rounded-3xl border border-emerald-600/40 bg-[#0b1e12]/85 p-5 shadow-lg shadow-black/60">
-          <h2 className="text-lg font-semibold dark:text-white">Son yükleme</h2>
+          <h2 className="text-lg font-semibold dark:text-white">{sarpTr("Son yükleme", "Last upload")}</h2>
           <p className="text-sm text-muted-foreground">
-            Tarih: {new Date(uploadResult.created_at).toLocaleString()}
+            {sarpTr("Tarih", "Date")}: {new Date(uploadResult.created_at).toLocaleString()}
           </p>
           {uploadResult.status && (
             <Badge
@@ -259,7 +261,7 @@ export default function UploadPage() {
           )}
           {uploadResult.reward && (
             <p className="text-sm text-muted-foreground">
-              Ödül: +{uploadResult.reward.xp} XP, +{uploadResult.reward.coins}{" "}
+              {sarpTr("Ödül", "Reward")}: +{uploadResult.reward.xp} XP, +{uploadResult.reward.coins}{" "}
               Coin
             </p>
           )}
@@ -275,7 +277,7 @@ export default function UploadPage() {
               </p>
               {typeof uploadResult.validation.confidence === "number" && (
                 <p className="text-xs text-muted-foreground">
-                  Güven: {formatConfidence(uploadResult.validation.confidence)}
+                  {sarpTr("Güven", "Confidence")}: {formatConfidence(uploadResult.validation.confidence)}
                 </p>
               )}
               {uploadResult.validation.reason && (
@@ -293,7 +295,7 @@ export default function UploadPage() {
         >
           <div className="space-y-3">
             <label className="text-sm font-medium text-emerald-100">
-              Kanıt Fotoğrafı
+              {sarpTr("Kanıt Fotoğrafı", "Proof Photo")}
             </label>
             <div className="relative aspect-[1/1] overflow-hidden rounded-2xl border border-emerald-700/40 bg-[#0f2515]">
               {cameraError ? (
@@ -329,7 +331,7 @@ export default function UploadPage() {
                   (!cameraReady && !capturedUrl)
                 }
               >
-                {capturedUrl ? "Tekrar Çek" : "Fotoğraf Çek"}
+                {capturedUrl ? sarpTr("Tekrar çek", "Retake") : sarpTr("Fotoğraf çek", "Capture photo")}
               </Button>
               {!capturedUrl && (
                 <Button
@@ -340,7 +342,7 @@ export default function UploadPage() {
                     !!cameraError || status === "uploading" || !cameraReady
                   }
                 >
-                  Çek ve Onayla
+                  {sarpTr("Çek ve Onayla", "Capture and Confirm")}
                 </Button>
               )}
             </div>
@@ -350,16 +352,17 @@ export default function UploadPage() {
             className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400 py-4 text-lg font-semibold text-zinc-900 shadow-lg shadow-emerald-900/60 transition-transform hover:scale-[1.02]"
             disabled={status === "uploading" || !file}
           >
-            {status === "uploading" ? "Yükleniyor..." : "Gönder"}
+            {status === "uploading"
+              ? sarpTr("Yükleniyor...", "Uploading...")
+              : sarpTr("Gönder", "Submit")}
           </Button>
-          {message && <p className={cnStatusClass(status)}>{message}</p>}
+          {message && <p className="text-sm text-amber-200/80">{message}</p>}
         </form>
       )}
 
       <Separator className="border-emerald-800/60" />
       <p className="text-xs text-emerald-200/70">
-        Kanıtın 3 saat içinde incelenecek ve onaylanacaktır. Herhangi bir sorun
-        yaşarsanız bizle iletişime geç.
+        {sarpTr("Kanıtın 3 saat içinde incelenecek ve onaylanacaktır. Herhangi bir sorun yaşarsanız bizle iletişime geç.", "Your proof will be reviewed and approved within 3 hours. Contact us if you have any issues.")}
       </p>
     </main>
   );

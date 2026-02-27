@@ -4,6 +4,8 @@ import "./globals.css";
 import React from "react";
 import { Toaster } from "sonner";
 import { usePathname } from "next/navigation";
+import { LangProvider } from "@/components/lang-provider";
+import { LanguageToggle } from "@/components/language-toggle";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -41,8 +43,11 @@ export default function RootLayout({
             : {}
         }
       >
-        <Toaster className="select-none" />
-        {children}
+        <LangProvider>
+          <Toaster className="select-none" />
+          <LanguageToggle className={isShowcase ? "top-6 right-6" : undefined} />
+          {children}
+        </LangProvider>
       </body>
     </html>
   );

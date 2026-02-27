@@ -3,7 +3,7 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useClickOutside } from "@/hooks/useOutsideClick";
-import { Lang } from "@/lib/lang";
+import { useLang } from "@/components/lang-provider";
 
 type Copy = { tr: string; en: string };
 
@@ -64,8 +64,9 @@ const partnerData: PartnerCard[] = [
   },
 ];
 
-export function PartnersSection({ lang }: { lang: Lang }) {
-  const sarpTr = (tr: string, en: string) => (lang === "tr" ? tr : en);
+export function PartnersSection() {
+  const { lang, t } = useLang();
+  const sarpTr = (tr: string, en: string) => t({ tr, en });
   const [active, setActive] = useState<PartnerCard | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const id = useId();

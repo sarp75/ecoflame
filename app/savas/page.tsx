@@ -10,6 +10,7 @@ import type { UserProfile } from "@/app/page";
 import { xpToLevel } from "@/lib/progression";
 import { textToColor } from "@/lib/profile";
 import DragonVisuals from "@/components/dragon-visuals";
+import { useLang } from "@/components/lang-provider";
 
 interface FightReport {
   me: UserProfile;
@@ -22,6 +23,8 @@ interface FightReport {
 }
 
 export default function FightPage() {
+  const { t } = useLang();
+  const sarpTr = (tr: string, en: string) => t({ tr, en });
   const [me, setMe] = useState<UserProfile | null>(null);
   const [report, setReport] = useState<FightReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,11 +35,11 @@ export default function FightPage() {
     const loadMe = async () => {
       try {
         const res = await fetch("/api/info", { cache: "no-store" });
-        if (!res.ok) throw new Error("profil yok");
+        if (!res.ok) throw new Error(sarpTr("profil yok", "profile missing"));
         const json = await res.json();
         setMe(json.data ?? json);
       } catch (err) {
-        setError("profil çekilemedi");
+        setError(sarpTr("profil çekilemedi", "profile could not be fetched"));
       } finally {
         setIsLoading(false);
       }
@@ -50,12 +53,12 @@ export default function FightPage() {
     setError(null);
     try {
       const res = await fetch("/api/fight", { method: "POST" });
-      if (!res.ok) throw new Error("savaş başarısız");
+      if (!res.ok) throw new Error(sarpTr("savaş başarısız", "battle failed"));
       const payload = await res.json();
       setReport(payload);
       setMe(payload.me);
     } catch (err) {
-      setError("savaş başlatılamadı");
+      setError(sarpTr("savaş başlatılamadı", "could not start battle"));
     } finally {
       setIsFighting(false);
     }
@@ -84,12 +87,12 @@ export default function FightPage() {
           asChild
           className="text-emerald-100 hover:bg-emerald-500/10"
         >
-          <Link href="/">← Ana Sayfa</Link>
+          <Link href="/">{sarpTr("← Ana Sayfa", "← Home")}</Link>
         </Button>
         <div className="flex items-center gap-3 rounded-full border border-emerald-600/40 bg-emerald-900/40 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em]">
           <span className="text-emerald-100">{me.name}</span>
           <Badge className="border border-emerald-300/60 bg-emerald-500/20 text-emerald-100">
-            Lvl {xpToLevel(me.total_xp)}
+            {sarpTr("Lvl", "Lvl")} {xpToLevel(me.total_xp)}
           </Badge>
         </div>
       </header>
@@ -116,13 +119,13 @@ export default function FightPage() {
               </p>
               <div className="grid gap-3 md:grid-cols-2">
                 <FighterCard
-                  label="Sen"
+                  label={sarpTr("Sen", "You")}
                   user={report.me}
                   power={report.dragonPower.me}
                   isWinner={report.winnerId === report.me.user_id}
                 />
                 <FighterCard
-                  label="Rakip"
+                  label={sarpTr("Rakip", "Opponent")}
                   user={report.opponent}
                   power={report.dragonPower.opponent}
                   isWinner={report.winnerId === report.opponent.user_id}
@@ -149,8 +152,8 @@ export default function FightPage() {
           ) : (
             <p className="text-sm text-muted-foreground">
               {me.fights_left <= 0
-                ? "Ejderhan yoruldu, bugün daha fazla savaşamazsın."
-                : "Ejderhan hazır. Rakip bulmak için Savaş başlat."}
+                ? sarpTr("Ejderhan yoruldu, bugün daha fazla savaşamazsın.", "Your dragon is tired; come back tomorrow.")
+                : sarpTr("Ejderhan hazır. Rakip bulmak için Savaş başlat.", "Your dragon is ready. Start to find a rival.")}
             </p>
           )}
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -160,10 +163,10 @@ export default function FightPage() {
             className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400 py-6 text-lg font-semibold text-zinc-900 shadow-lg shadow-emerald-900/50 transition-transform hover:scale-[1.02] disabled:opacity-60"
           >
             {me.fights_left <= 0
-              ? "Hakların bitti"
+              ? sarpTr("Hakların bitti", "No fights left")
               : isFighting
-                ? "Savaş başlıyor..."
-                : "Savaş başlat"}
+                ? sarpTr("Savaş başlıyor...", "Battle starting...")
+                : sarpTr("Savaş başlat", "Start battle")}
           </Button>
         </div>
       </section>
@@ -182,6 +185,8 @@ function FighterCard({
   power: number;
   isWinner: boolean;
 }) {
+  const { t } = useLang();
+  const sarpTr = (tr: string, en: string) => t({ tr, en });
   return (
     <div
       className={`rounded-2xl border p-4 transition-all duration-300 ${
@@ -207,8 +212,8 @@ function FighterCard({
         </div>
       </div>
       <div className="mt-4 flex justify-between text-[11px] uppercase tracking-[0.3em] text-emerald-200/80">
-        <span>Lvl {xpToLevel(user.total_xp)}</span>
-        <span>Güç {power}</span>
+        <span>{sarpTr("Seviye", "Level")} {xpToLevel(user.total_xp)}</span>
+        <span>{sarpTr("Güç", "Power")} {power}</span>
       </div>
     </div>
   );
