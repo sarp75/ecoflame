@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import type { UserProfile } from "@/app/page";
 import { xpToLevel } from "@/lib/progression";
 import DragonVisuals from "@/components/dragon-visuals";
+import { useLang } from "@/components/lang-provider";
 
 const HABITATS = [
   { bg: "from-[#041106] via-[#0f2b16] to-[#1f4f2c]", title: "Tohum Diyarı" },
@@ -17,30 +18,51 @@ const HABITATS = [
   { bg: "from-[#1b3f21] via-[#44b978] to-[#b4ffd0]", title: "Sonsuz Koru" },
 ];
 const TIPS = [
-  "şşş {name}, seviye {level} sonrası yeni habitat açılıyor",
-  "klanın güçlü mü {name}? ejderhanla göster!",
-  "bugün {name} tam {level} level, kimse bulaşmasın.",
-  "coin sayısı {coins}, biraz görevle arttıralım mı?",
-  "{name}, su iyi giderdi! {coins} coin ile depo doldurursun.",
-  "{name}, ejderha bakımı sabır ister, acele etme.",
+  {
+    tr: "şşş {name}, seviye {level} sonrası yeni habitat açılıyor",
+    en: "psst {name}, a new habitat unlocks after level {level}",
+  },
+  {
+    tr: "klanın güçlü mü {name}? ejderhanla göster!",
+    en: "is your clan strong {name}? show it with your dragon!",
+  },
+  {
+    tr: "bugün {name} tam {level} level, kimse bulaşmasın.",
+    en: "today {name} is level {level}, better not mess around.",
+  },
+  {
+    tr: "coin sayısı {coins}, biraz görevle arttıralım mı?",
+    en: "coins: {coins}, want to boost it with a task?",
+  },
+  {
+    tr: "{name}, su iyi giderdi! {coins} coin ile depo doldurursun.",
+    en: "{name}, water sounds great! {coins} coins can fill the tank.",
+  },
+  {
+    tr: "{name}, ejderha bakımı sabır ister, acele etme.",
+    en: "{name}, dragon care needs patience, no rush.",
+  },
 ];
 
 export default function DragonComponent(me: UserProfile) {
+  const { t } = useLang();
   const level = xpToLevel(me.total_xp);
   const stage = useMemo(
     () => Math.min(HABITATS.length - 1, Math.floor(level / 5)),
     [level],
   );
+  const tips = useMemo(() => TIPS.map((entry) => t(entry)), [t]);
+  const tipCount = Math.max(1, tips.length);
   const [tipIndex, setTipIndex] = useState(0);
   const [isExcited, setIsExcited] = useState(false);
 
   useEffect(() => {
     const handle = setInterval(
-      () => setTipIndex((prev) => (prev + 1) % TIPS.length),
+      () => setTipIndex((prev) => (prev + 1) % tipCount),
       6000,
     );
     return () => clearInterval(handle);
-  }, []);
+  }, [tipCount]);
 
   useEffect(() => {
     if (!isExcited) return;
@@ -50,11 +72,11 @@ export default function DragonComponent(me: UserProfile) {
 
   const activeTip = useMemo(
     () =>
-      TIPS[tipIndex]
+      (tips[tipIndex % tipCount] ?? "")
         .replaceAll("{name}", me.name)
         .replaceAll("{coins}", String(me.coins))
         .replaceAll("{level}", String(level)),
-    [tipIndex, me.name, me.coins, level],
+    [tipIndex, tipCount, tips, me.name, me.coins, level],
   );
 
   const dragonPose = isExcited
