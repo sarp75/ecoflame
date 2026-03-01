@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
   const { wantedClass } = await request.json();
   if (typeof wantedClass !== "string" || wantedClass.length === 0) {
-    return Response.json({ error: "nigga wgat it is" }, { status: 400 });
+    return Response.json({ error: "[N-WORD CENSOR] wgat it is" }, { status: 400 });
   }
 
   const { data, error } = await supabase

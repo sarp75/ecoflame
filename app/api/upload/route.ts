@@ -2,12 +2,13 @@
  * Upload route for task submissions.
  * Accepts multipart/form-data, stores files on uguu.se, and writes DB rows.
  * Adds Gemini-based validation details to proof metadata.
- *
+ * Formal type shiiii
  * @return JSON { id, proof_url, created_at, status, validation }
  */
 
 import { Pool, PoolClient } from "pg";
 import { createClient } from "@/lib/supabase/server"; // this is the upload endpoint for task submissions
+import { baseTasks } from "@/lib/tasks";
 
 // this is the upload endpoint for task submissions
 // it accepts a file and an optional task_id
@@ -124,6 +125,17 @@ export async function POST(req: Request) {
           [taskId],
         );
         taskMeta = taskLookup.rows[0] ?? null;
+        if (!taskMeta) {
+          const fallbackTask = baseTasks.find((task) => task.id === taskId);
+          if (fallbackTask) {
+            // fallback shiiiii when db task is missing
+            taskMeta = {
+              name: fallbackTask.name.en || fallbackTask.name.tr,
+              desc: fallbackTask.desc.en || fallbackTask.desc.tr,
+              xp: fallbackTask.xp,
+            };
+          }
+        }
       }
 
       // gemini shiiiii might be slow but we keep it inline for now

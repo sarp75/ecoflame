@@ -22,6 +22,7 @@ import { xpToLevel } from "@/lib/progression";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type DecisionResult, evaluateDecision } from "@/lib/player-decision";
+import { baseTasks, localizeTasks, type LocalizedTask } from "@/lib/tasks";
 import { useLang } from "@/components/lang-provider";
 
 //import { textToColor } from "@/lib/profile";
@@ -58,52 +59,10 @@ interface ClassLeaderboardRow {
   class: string;
   t_xp: number;
 }
-export interface Task {
-  id: string;
-  name: string;
-  proof_type: string;
-  xp: number;
-  desc: string;
-  active: boolean;
-}
+export type Task = LocalizedTask;
 export default function Page() {
   const { t } = useLang();
   const sarpTr = (tr: string, en: string) => t({ tr, en });
-  const buildTasks = () => [
-    {
-      id: "walk-10k",
-      name: sarpTr("Günlük 10K Adım", "Daily 10K Steps"),
-      proof_type: "photo",
-      xp: 120,
-      desc: sarpTr(
-        "10.000 adım atıp ekran görüntüsü yükle.",
-        "Walk 10,000 steps and upload a screenshot.",
-      ),
-      active: true,
-    },
-    {
-      id: "read-20",
-      name: sarpTr("20 Dakika Oku", "Read for 20 Minutes"),
-      proof_type: "photo",
-      xp: 90,
-      desc: sarpTr(
-        "Okuduğun kitabın fotoğrafını ekle.",
-        "Add a photo of the book you read.",
-      ),
-      active: true,
-    },
-    {
-      id: "water-2l",
-      name: sarpTr("2L Su İç", "Drink 2L Water"),
-      proof_type: "photo",
-      xp: 80,
-      desc: sarpTr(
-        "Günün su takibini paylaş.",
-        "Share your water intake for the day.",
-      ),
-      active: true,
-    },
-  ];
   const [me, setMe] = useState<UserProfile | null>(null);
   const [myClass, setMyClass] = useState<UserProfile[] | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -146,7 +105,7 @@ export default function Page() {
 
   const fetchTasks = async () => {
     if (!me) throw new Error(sarpTr("Kullanıcı henüz hazır değil", "User not loaded yet"));
-    const hardcoded = buildTasks();
+    const hardcoded = localizeTasks(baseTasks, (pair) => sarpTr(pair.tr, pair.en));
     setTasks(hardcoded);
     setSelectedTask((prev) => {
       if (prev) {

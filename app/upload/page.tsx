@@ -7,15 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/components/lang-provider";
+import {
+  baseTasks,
+  localizeTasks,
+  type BaseTask,
+  type LocalizedTask,
+} from "@/lib/tasks";
 
-type Task = {
-  id: string;
-  name: string;
-  proof_type: string;
-  xp: number;
-  desc: string;
-  active: boolean;
-};
+type Task = LocalizedTask;
 
 type UploadResult = {
   id: string;
@@ -58,9 +57,24 @@ export default function UploadPage() {
       try {
         const res = await fetch("/api/task", { cache: "force-cache" });
         if (!res.ok) throw new Error();
-        const json = await res.json();
-        setTasks(json);
+        const json = (await res.json()) as BaseTask[];
+        const localized = localizeTasks(json, (pair) => sarpTr(pair.tr, pair.en));
+        setTasks(localized);
+        setTaskId((current) => {
+          if (current && localized.some((task) => task.id === current)) {
+            return current;
+          }
+          return localized[0]?.id ?? "";
+        });
       } catch {
+        const fallback = localizeTasks(baseTasks, (pair) => sarpTr(pair.tr, pair.en));
+        setTasks(fallback);
+        setTaskId((current) => {
+          if (current && fallback.some((task) => task.id === current)) {
+            return current;
+          }
+          return fallback[0]?.id ?? "";
+        });
         setMessage(sarpTr("Görev listesi yüklenemedi.", "Task list could not load."));
       }
     };

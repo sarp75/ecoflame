@@ -24,10 +24,10 @@ export default function InstallPage() {
       setDeferredPrompt(event);
       setMessage("hazırsın, aşağıdaki butonla ana ekrana ekle");
     };
-    // @ts-expect-error nigga
+    // @ts-expect-error [N-WORD CENSOR]
     window.addEventListener("beforeinstallprompt", handlePrompt);
     return () =>
-      // @ts-expect-error nigga
+      // @ts-expect-error [N-WORD CENSOR]
       window.removeEventListener("beforeinstallprompt", handlePrompt);
   }, []);
 
