@@ -66,7 +66,7 @@ export default function InstallPage() {
         {message && <p className="text-sm text-emerald-200/80">{message}</p>}
         {status === "accepted" && (
           <div className="rounded-2xl border border-lime-400/50 bg-lime-400/10 px-4 py-3 text-sm text-lime-50">
-            tamamlandığında ana ekranda ikon tufanı göreceksin
+            tamamlandığında ana ekranda göreceksin
           </div>
         )}
         {status === "dismissed" && (
