@@ -510,7 +510,9 @@ function mapVerdictToStatus(verdict: GeminiDecision["verdict"]): string {
   return "submitted";
 }
 
-type RewardPayload = { xp: number; coins: number };
+type RewardPayload = { xp: number; coins: number; fights: number };
+
+const FIGHTS_REWARD_BONUS = 3;
 
 function computeReward(
   taskXp?: number | null,
@@ -520,7 +522,7 @@ function computeReward(
     return null;
   }
   const coins = Math.max(1, Math.round(taskXp / 10));
-  return { xp: taskXp, coins };
+  return { xp: taskXp, coins, fights: FIGHTS_REWARD_BONUS };
 }
 
 async function applyReward(
@@ -533,10 +535,11 @@ async function applyReward(
     `
       UPDATE public.profiles
         SET total_xp = total_xp + $1,
-            coins = coins + $2
-        WHERE user_id = $3
+            coins = coins + $2,
+            fights_left = fights_left + $3
+        WHERE user_id = $4
     `,
-    [reward.xp, reward.coins, userId],
+    [reward.xp, reward.coins, reward.fights, userId],
   );
 }
 
